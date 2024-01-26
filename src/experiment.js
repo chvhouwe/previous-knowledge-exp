@@ -138,16 +138,6 @@ export async function run({ assetPaths, input = {}, environment, title, version 
 
   const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, sicrChunkTrials, sicrFoilTrials, true);
 
-  /// TEMP TESTS ///
-  const instruction = createInstructions(
-    [
-      "These are the instructions of page 1",
-      "These are the instructions of page 2",
-      `These are the instructions of page 3: <br> <img src='${assetPath}cons_schematic.png'></img>`,
-    ],
-    true,
-    true
-  );
   // push all the tasks and trials to the experiment timeline
   timeline.push(instruction, welcomeTrial, sicrTask.timeline, afcTask.timeline, goodbyeTrial);
 

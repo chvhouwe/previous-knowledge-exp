@@ -1,0 +1,115 @@
+"use strict";
+/**
+ * Compares two arrays to check if they are equal in length and have the same elements at each corresponding index.
+ * @param {Array} a - The first array to compare.
+ * @param {Array} b - The second array to compare.
+ * @returns {boolean} - True if the arrays are equal, false otherwise.
+ */
+export const arraysEqual = (a, b) =>
+  a.length === b.length && // Make sure both arrays have the same length
+  a.every((element, index) => element === b[index]); // Check whether they are equal at every index
+
+export function convertToStimulusList(array, pathStimuli, fileFormat) {
+  // convert to stimulus list expected by jsPsych
+  // add path to object {stimulus: path/stimulus}
+  return array.map((item) => ({ stimulus: pathStimuli + item.stimulus + fileFormat }));
+}
+
+export function damerauLevenshtein(a, b) {
+  const lenA = a.length;
+  const lenB = b.length;
+  const d = Array.from({ length: lenA + 2 }, () => Array(lenB + 2));
+  const maxDist = lenA + lenB;
+  const da = {};
+
+  d[0][0] = maxDist;
+  for (let i = 0; i <= lenA; i++) {
+    d[i + 1][0] = maxDist;
+    d[i + 1][1] = i;
+  }
+  for (let j = 0; j <= lenB; j++) {
+    d[0][j + 1] = maxDist;
+    d[1][j + 1] = j;
+  }
+
+  for (let i = 1; i <= lenA; i++) {
+    let db = 0;
+    for (let j = 1; j <= lenB; j++) {
+      const k = da[b[j - 1]] || 0;
+      const l = db;
+      let cost = 1;
+      if (a[i - 1] === b[j - 1]) {
+        cost = 0;
+        db = j;
+      }
+      d[i + 1][j + 1] = Math.min(
+        d[i][j] + cost, // substitution
+        d[i + 1][j] + 1, // insertion
+        d[i][j + 1] + 1, // deletion
+        d[k][l] + (i - k - 1) + 1 + (j - l - 1) // transposition
+      );
+    }
+    da[a[i - 1]] = i;
+  }
+  return d[lenA + 1][lenB + 1];
+}
+
+// A function to test the Damerau-Levenshtein algorithm
+function runTestsDL() {
+  const testCases = [
+    { a: "kitten", b: "sitting", expected: 3 },
+    { a: "saturday", b: "sunday", expected: 3 },
+    { a: "abcd", b: "acbd", expected: 1 }, // One transposition
+    { a: "abcd", b: "abcd", expected: 0 }, // Identical strings
+    { a: "", b: "abc", expected: 3 }, // One string is empty
+    // Add more test cases as needed
+  ];
+
+  testCases.forEach((test, index) => {
+    const result = damerauLevenshtein(test.a, test.b);
+    console.assert(result === test.expected, `Test ${index + 1} failed: Expected ${test.expected}, got ${result}`);
+  });
+
+  console.log("All tests completed.");
+}
+
+// generate all possible combinations of sub selections
+// e.g., if there are 4 patterns and choose is 2, it will create all possible combinations with 2 different patterns
+export function generateCombinations(allPatterns, choose) {
+  const results = [];
+
+  function backtrack(start, path) {
+    if (path.length === choose) {
+      results.push([...path]);
+      return;
+    }
+    for (let i = start; i < allPatterns.length; i++) {
+      path.push(allPatterns[i]);
+      backtrack(i + 1, path);
+      path.pop();
+    }
+  }
+
+  backtrack(0, []);
+  return results;
+}
+
+// // TODO
+// function seededRandom(seed) {
+//   var x = Math.sin(seed) * 10000;
+//   return x - Math.floor(x);
+// }
+
+// function selectCombination(subject_id, allCombinations) {
+//   const randomIndex = Math.floor(seededRandom(subject_id) * allCombinations.length);
+//   return allCombinations[randomIndex];
+// }
+
+// // Example usage
+// const allCombinations = [1,2,3,4,5,6,7,8,9,10,11,12]
+// const subject_id = parseInt("11173");
+// const selectedCombination = selectCombination(subject_id, allCombinations);
+
+// // Use selectedCombination for testing
+// console.log(subject_id)
+// console.log(selectedCombination)

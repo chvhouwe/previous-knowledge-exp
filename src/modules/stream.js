@@ -16,7 +16,9 @@ export class Stream {
     this.patternSize = patterns[0].length;
     this.patterns = this.createPatternObjects(patterns);
     this.numberOfRepetitions = numberOfRepetitions;
+    this.itemIndexList = this.createItemIndexMap(this.patterns);
     this._patternList = new Array(numberOfRepetitions).fill(structuredClone(this.patterns));
+
     this._itemList = this.patternListToItemList(this.patternList, this.patternSize);
   }
 
@@ -42,7 +44,7 @@ export class Stream {
     // Returns the full pattern list in a 1D array, per item (e.g., for looping)
     const flatArray = patternList.reduce((result, pattern) => {
       for (let i = 1; i <= patternSize; i++) {
-        const itemIndex = (pattern.index - 1) * patternSize + i;
+        const itemIndex = this.itemIndexList[pattern[`stimulus${i}`]];
         result.push({
           stimulus: pattern[`stimulus${i}`],
           item_index: itemIndex,
@@ -78,6 +80,27 @@ export class Stream {
     let stimulusList = this.itemList.map((item) => ({ stimulus: pathStimuli + item.stimulus + fileFormat }));
     streamTimeline.timeline = stimulusList;
     return streamTimeline;
+  }
+  createItemIndexMap(patterns) {
+    let itemIndexMap = new Map();
+    let currentIndex = 1; // Start indexing from 1
+
+    patterns.forEach((pattern) => {
+      Object.values(pattern).forEach((value) => {
+        if (typeof value === "string" || value instanceof String) {
+          if (!itemIndexMap.has(value)) {
+            itemIndexMap.set(value, currentIndex++);
+          }
+        }
+      });
+    });
+
+    // Convert the Map to a plain object for the desired format
+    const resultObject = {};
+    itemIndexMap.forEach((index, stimulus) => {
+      resultObject[stimulus] = index;
+    });
+    return resultObject;
   }
 
   shuffle(

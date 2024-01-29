@@ -23,19 +23,23 @@ export class SicrTask {
     const sicrTaskInstance = this;
     // Add chunk trials first
     for (let trial = 0; trial < numberOfChunkTrials; trial++) {
-      let currentTrial = this.createSicrTrial(this.chunkTrialList[trial], "chunk", this.trialCounter);
+      let currentTrial = this.createSicrTrial(this.chunkTrialList[trial], "chunk");
       trialList.push(currentTrial);
-      this.trialCounter++;
     }
     for (let trial = 0; trial < numberOfFoilTrials; trial++) {
-      let currentTrial = this.createSicrTrial(this.foilTrialList[trial], "foil", this.trialCounter);
+      let currentTrial = this.createSicrTrial(this.foilTrialList[trial], "foil");
       trialList.push(currentTrial);
-      this.trialCounter++;
     }
 
     if (this.shuffleTrials) {
       fischerYatesShuffle(trialList);
     }
+
+    trialList.forEach((trial, index) => {
+      trial.data = trial.data || {}; // Ensure the data object exists
+      trial.data.trialNumber = index + 1;
+    });
+
     const sicrTask = {
       type: AudioKeyboardResponsePlugin,
       timeline: trialList,
@@ -43,7 +47,7 @@ export class SicrTask {
 
     return sicrTask;
   }
-  createSicrTrial(sequence, trialType, trialNumber) {
+  createSicrTrial(sequence, trialType) {
     const sicrTaskInstance = this;
     const sequenceLength = sequence.length;
     let stimulusList = [];
@@ -72,13 +76,13 @@ export class SicrTask {
         sequence: sicrTaskInstance.preprocessString(sequence.join("")),
         task: "sicr",
         results: true, // marker that this trial contains relevant data
-        trialNumber: trialNumber,
       },
       on_finish: function (data) {
         let response = data.response["Q0"];
         data.response = sicrTaskInstance.preprocessString(response);
         data.trialCompleted = true;
         data.distance = damerauLevenshtein(data.sequence, data.response);
+        data.trialRT = data.rt;
       },
     };
 

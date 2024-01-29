@@ -57,6 +57,7 @@ export async function run({ assetPaths, input = {}, environment, title, version 
     ["Ze", "Ta", "Pu"],
     ["Wi", "Ke", "Fo"],
     ["Ho", "Di", "Ve"],
+    ["Di", "Ho", "Mu"],
   ];
 
   // Create the stream with patternlist and how many times they must be repeated
@@ -99,11 +100,11 @@ export async function run({ assetPaths, input = {}, environment, title, version 
 
   const completionTrialList = [
     [
-      ["Ba", "Ni", "Gi"], // completion pattern
+      ["Ba", "ping", "Gi"], // completion pattern
       ["Lu", "Wi", "Wi"], // alternatives
     ],
     [
-      ["Ba", "Ni"],
+      ["Ba", "ping"],
       ["Lu", "Wi", "Wi"],
     ],
   ];
@@ -139,7 +140,7 @@ export async function run({ assetPaths, input = {}, environment, title, version 
   const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, sicrChunkTrials, sicrFoilTrials, true);
 
   // push all the tasks and trials to the experiment timeline
-  timeline.push(instruction, welcomeTrial, sicrTask.timeline, afcTask.timeline, goodbyeTrial);
+  timeline.push(welcomeTrial, sicrTask.timeline, afcTask.timeline, goodbyeTrial);
 
   await jsPsych.run(timeline);
 

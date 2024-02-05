@@ -20,6 +20,14 @@ export const setFullscreen = {
   fullscreen_mode: true,
 };
 
+// HUGGINS PITCH INSTRUCTIONS
+const hpPage1 =
+  "<b> HOOFDTELEFOON CHECK </b><br><br>" +
+  "Voor je aan de studie begint volgt nog een korte test om zeker te zijn <br>" +
+  "dat jouw hoofdtelefoon functioneert.";
+
+export const hpInstructions = createInstructions([hpPage1], true, true);
+
 // STREAM RELATED INSTRUCTIONS
 // pages to add to instructions
 const streamPage1 =

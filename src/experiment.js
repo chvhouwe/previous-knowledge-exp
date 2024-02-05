@@ -18,6 +18,7 @@ import {
   streamInstructions,
   sicrInstructions,
   afcInstructions,
+  hpInstructions,
 } from "./modules/instruction.js";
 import { Stream } from "./modules/stream.js";
 import { AfcTask } from "./modules/afc.js";
@@ -27,9 +28,9 @@ import { selectTriplets } from "./modules/retest.js";
 import { getBrowserInfo } from "./modules/helper-functions.js";
 import { generateCombinations } from "./modules/helper-functions.js";
 import { catchTrialResponseList, numberOfCatchTrials } from "./modules/catch-trial-manager.js";
-import { recognitionTrialList, completionTrialList } from "./modules/trials.js";
-
-global.test = "test";
+import { recognitionTrialList, completionTrialList } from "./modules/afc-trials.js";
+import { ChunkTrialList, foilTrialList } from "./modules/sicr-trials.js";
+import { createHugginsPitchTask } from "./modules/huggins-pitch";
 
 /**
  * This function will be executed by jsPsych Builder and is expected to run the jsPsych experiment
@@ -64,6 +65,19 @@ export async function run({ assetPaths, input = {}, environment, title, version 
   });
 
   /*
+   ****************** HUGGINS PITCH HEADPHONE TEST *******************
+   */
+  let hugginsTimeline = createHugginsPitchTask(jsPsych, assetPath, fileFormat, [
+    "HP_1_1",
+    "HP_1_2",
+    "HP_1_3",
+    "HP_2_1",
+    "HP_2_2",
+    "HP_2_3",
+  ]);
+  console.log(hugginsTimeline);
+
+  /*
    ****************** EXPOSURE *******************
    */
   // Patterns that are used for exposure
@@ -77,25 +91,6 @@ export async function run({ assetPaths, input = {}, environment, title, version 
     ["Ze", "Ta", "Pu"],
     ["So", "Ne", "Ja"],
     ["Wi", "Ke", "Fo"],
-  ];
-
-  const sicrChunkTrials = [
-    ["Ba", "Lu", "Gi", "Ze", "Ta", "Pu"],
-    ["Ba", "Lu", "Gi", "Di", "Ho", "Mu"],
-    ["Ze", "Ta", "Pu", "So", "Ne", "Ja"],
-    ["Ze", "Ta", "Pu", "Mu", "Ve", "Ho"],
-    ["So", "Ne", "Ja", "Wi", "Ke", "Fo"],
-    ["So", "Ne", "Ja", "Ve", "Mu", "Di"],
-    ["Wi", "Ke", "Fo", "Ho", "Di", "Ve"],
-    ["Wi", "Ke", "Fo", "Ba", "Lu", "Gi"],
-    ["Ho", "Di", "Ve", "Ze", "Ta", "Pu"],
-    ["Ho", "Di", "Ve", "Di", "Ho", "Mu"],
-    ["Di", "Ho", "Mu", "So", "Ne", "Ja"],
-    ["Di", "Ho", "Mu", "Mu", "Ve", "Ho"],
-    ["Mu", "Ve", "Ho", "Wi", "Ke", "Fo"],
-    ["Mu", "Ve", "Ho", "Ve", "Mu", "Di"],
-    ["Ve", "Mu", "Di", "Ho", "Di", "Ve"],
-    ["Ve", "Mu", "Di", "Ba", "Lu", "Gi"],
   ];
 
   // Create the stream with patternlist and how many times they must be repeated
@@ -135,19 +130,22 @@ export async function run({ assetPaths, input = {}, environment, title, version 
     ["Gi", "Wi", "Lu", "Fo", "Ke", "Ba"],
   ];
 
-  const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, sicrChunkTrials, sicrFoilTrials, true);
+  const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, ChunkTrialList, foilTrialList, true);
 
   // push all the tasks and trials to the experiment timeline
   timeline.push(
-    streamInstructions,
+    hpInstructions,
+    hugginsTimeline,
+    //streamInstructions,
     //stream.timeline,
-    sicrInstructions,
-    sicrTask.timeline,
-    afcInstructions,
-    afcTask.timeline,
+    //sicrInstructions,
+    //sicrTask.timeline,
+    //afcInstructions,
+    //afcTask.timeline,
     goodbyeTrial
   );
   console.log(afcTask.timeline);
+  console.log(sicrTask.timeline);
 
   await jsPsych.run(timeline);
 

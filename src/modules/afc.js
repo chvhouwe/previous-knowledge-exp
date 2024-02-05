@@ -56,21 +56,21 @@ export class AfcTask {
       );
 
       _recognitionTrialList.push(currentTrial);
-      this.trialCounter += _recognitionTrialList.length;
     }
 
-    // Shuffle if necessary and push to trial list
-    if (this.shuffleTrials) {
-      fischerYatesShuffle(_recognitionTrialList);
-    }
+    // // Shuffle if necessary and push to trial list
+    // if (this.shuffleTrials) {
+    //   fischerYatesShuffle(_recognitionTrialList);
+    // }
 
-    // Assign a trial number to each trial after shuffling
-    _recognitionTrialList.forEach((trial, index) => {
-      trial.data = trial.data || {}; // Ensure the data object exists
-      trial.data.trialNumber = index + 1; // Assign trial number
-    });
+    // // Assign a trial number to each trial after shuffling
+    // _recognitionTrialList.forEach((trial, index) => {
+    //   trial.data = trial.data || {}; // Ensure the data object exists
+    //   trial.data.trialNumber = index + 1; // Assign trial number
+    // });
 
     trialList.push(..._recognitionTrialList); // ... _> spread operator to push the individual items of the array
+    //this.trialCounter += _recognitionTrialList.length;
 
     // Add the completion trials, shuffle if necessary
     for (let trial = 0; trial < numberOfCompletionTrials; trial++) {
@@ -83,20 +83,31 @@ export class AfcTask {
       _completionTrialList.push(currentTrial);
     }
 
-    // Shuffle if necessary and push to trial list
-    if (this.shuffleTrials) {
-      fischerYatesShuffle(_completionTrialList);
-    }
+    // // Shuffle if necessary and push to trial list
+    // if (this.shuffleTrials) {
+    //   fischerYatesShuffle(_completionTrialList);
+    // }
 
-    // Assign a trial number to each trial after shuffling
-    _completionTrialList.forEach((trial, index) => {
-      trial.data = trial.data || {}; // Ensure the data object exists
-      trial.data.trialNumber = index + this.trialCounter; // Assign trial number
-    });
+    // // Assign a trial number to each trial after shuffling
+    // _completionTrialList.forEach((trial, index) => {
+    //   trial.data = trial.data || {}; // Ensure the data object exists
+    //   trial.data.trialNumber = index + this.trialCounter; // Assign trial number
+    // });
 
     trialList.push(..._completionTrialList); // ... _> spread operator to push the individual items of the array
 
-    this.trialCounter += _completionTrialList.length;
+    //this.trialCounter += _completionTrialList.length;
+
+    // Shuffle if necessary and push to trial list
+    if (this.shuffleTrials) {
+      fischerYatesShuffle(trialList);
+    }
+
+    // Assign a trial number to each trial after shuffling
+    trialList.forEach((trial, index) => {
+      trial.data = trial.data || {}; // Ensure the data object exists
+      trial.data.trialNumber = index + this.trialCounter; // Assign trial number
+    });
 
     // create a jspsych object with trial list as timeline
     const afcTask = {

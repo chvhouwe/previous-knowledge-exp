@@ -164,7 +164,7 @@ export class Stream {
       choices: "NO_KEYS",
       trial_ends_after_audio: true,
       timeline: stimulusList,
-      on_finish: function () {
+      on_timeline_finish: function () {
         let correctResponses = 0;
         let tooSlowResponses = 0;
         let incorrectResponses = 0;

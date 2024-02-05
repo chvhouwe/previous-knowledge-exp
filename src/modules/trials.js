@@ -1,29 +1,210 @@
-"use strict";
-import FullscreenPlugin from "@jspsych/plugin-fullscreen";
-import HtmlKeyboardResponsePlugin from "@jspsych/plugin-html-keyboard-response";
-import AudioKeyboardResponsePlugin from "@jspsych/plugin-audio-keyboard-response";
+const items = ["Ho", "Di", "Ve", "Mu", "Ba", "Lu", "Gi", "Ze", "Ta", "Pu", "So", "Ne", "Ja", "Wi", "Ke", "Fo"];
 
-const assetPath = "assets/";
+const recognitionTrialListIndexed = [
+  [
+    [0, 1, 2],
+    [1, 12, 7],
+  ],
+  [
+    [1, 0, 3],
+    [0, 1, 3],
+  ],
+  [
+    [3, 2, 0],
+    [3, 2, 8],
+  ],
+  [
+    [2, 3, 1],
+    [6, 0, 2],
+  ],
+  [
+    [4, 5, 6],
+    [8, 4, 10],
+  ],
+  [
+    [7, 8, 9],
+    [15, 10, 5],
+  ],
+  [
+    [10, 11, 12],
+    [13, 5, 9],
+  ],
+  [
+    [13, 14, 15],
+    [2, 0, 14],
+  ],
+  [
+    [0, 1, 2],
+    [14, 0, 3],
+  ],
+  [
+    [1, 0, 3],
+    [13, 5, 9],
+  ],
+  [
+    [3, 2, 0],
+    [1, 7, 3],
+  ],
+  [
+    [2, 3, 1],
+    [15, 10, 5],
+  ],
+  [
+    [4, 5, 6],
+    [13, 2, 1],
+  ],
+  [
+    [7, 8, 9],
+    [4, 11, 12],
+  ],
+  [
+    [10, 11, 12],
+    [0, 1, 3],
+  ],
+  [
+    [13, 14, 15],
+    [15, 6, 9],
+  ],
+  [
+    [0, 1, 2],
+    [8, 4, 10],
+    [1, 7, 3],
+    [13, 2, 1],
+  ],
+  [
+    [1, 0, 3],
+    [8, 4, 10],
+    [15, 10, 5],
+    [0, 1, 3],
+  ],
+  [
+    [3, 2, 0],
+    [15, 6, 9],
+    [1, 12, 7],
+    [1, 7, 3],
+  ],
+  [
+    [2, 3, 1],
+    [4, 11, 12],
+    [14, 0, 3],
+    [2, 0, 14],
+  ],
+  [
+    [4, 5, 6],
+    [15, 6, 9],
+    [13, 5, 9],
+    [1, 12, 7],
+  ],
+  [
+    [7, 8, 9],
+    [0, 1, 3],
+    [3, 2, 8],
+    [14, 0, 3],
+  ],
+  [
+    [10, 11, 12],
+    [13, 2, 1],
+    [6, 0, 2],
+    [2, 0, 14],
+  ],
+  [
+    [13, 14, 15],
+    [4, 11, 12],
+    [3, 2, 8],
+    [6, 0, 2],
+  ],
+  [
+    [1, 2],
+    [0, 15],
+  ],
+  [
+    [0, 3],
+    [1, 3],
+  ],
+  [
+    [2, 0],
+    [5, 2],
+  ],
+  [
+    [3, 1],
+    [12, 1],
+  ],
+  [
+    [5, 6],
+    [4, 10],
+  ],
+  [
+    [7, 8],
+    [2, 13],
+  ],
+  [
+    [11, 12],
+    [5, 10],
+    [11, 14],
+    [8, 3],
+  ],
+  [
+    [13, 14],
+    [7, 9],
+    [0, 7],
+    [14, 6],
+  ],
+  [
+    [0, 1],
+    [6, 0],
+    [2, 13],
+    [12, 4],
+  ],
+  [
+    [3, 2],
+    [8, 1],
+    [9, 3],
+    [15, 11],
+  ],
+];
 
-export const welcomeTrial = {
-  type: HtmlKeyboardResponsePlugin,
-  stimulus: "Welcome to the best experiment ever!",
-};
+export const recognitionTrialList = recognitionTrialListIndexed.map((trial) =>
+  trial.map((pattern) => pattern.map((index) => items[index]))
+);
 
-export const goodbyeTrial = {
-  type: HtmlKeyboardResponsePlugin,
-  stimulus: "Goodbye!",
-};
+// completion trials
+const completionTrialListIndexed = [
+  [
+    [0, -1, 2],
+    [1, 12, 8],
+  ],
+  [
+    [1, 0, -1],
+    [3, 5, 15],
+  ],
+  [
+    [-1, 5, 6],
+    [4, 13, 2],
+  ],
+  [
+    [7, -1, 9],
+    [8, 14, 3],
+  ],
+  [
+    [10, -1],
+    [11, 6, 0],
+  ],
+  [
+    [-1, 14],
+    [13, 7, 11],
+  ],
+  [
+    [2, -1],
+    [0, 1, 4],
+  ],
+  [
+    [-1, 3],
+    [2, 10, 9],
+  ],
+];
 
-export const setFullscreen = {
-  type: FullscreenPlugin,
-  fullscreen_mode: true,
-};
+export const completionTrialList = completionTrialListIndexed.map((trial) =>
+  trial.map((pattern) => pattern.map((index) => (index === -1 ? "ping" : items[index])))
+);
 
-export const streamTimeline = {
-  type: AudioKeyboardResponsePlugin,
-  prompt: "X",
-  choices: "NO_KEYS",
-  trial_ends_after_audio: true,
-  timeline: [],
-};
+console.log(completionTrialList);

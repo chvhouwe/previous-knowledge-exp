@@ -1,6 +1,8 @@
 "use strict";
-import { fischerYatesShuffle } from "./random.js";
-import { streamTimeline } from "./trials.js";
+import { fischerYatesShuffle, getRandomInt } from "./random.js";
+import { streamTimeline } from "./instruction.js";
+import AudioKeyboardResponsePlugin from "@jspsych/plugin-audio-keyboard-response";
+const { startCatchTrial, catchTrialResponseList, awaitingResponse } = require("./catch-trial-manager.js");
 
 /**
  * Represents a stream/sequence made up of patterns
@@ -12,25 +14,49 @@ export class Stream {
    * @param {Array} patterns - The list of unique patterns to be included in the stream.
    * @param {number} numberOfRepetitions - The number of times the entire pattern list should be repeated.
    */
-  constructor(patterns, numberOfRepetitions) {
+  constructor(jsPsych, patterns, numberOfRepetitions) {
     this.patternSize = patterns[0].length;
     this.patterns = this.createPatternObjects(patterns);
     this.numberOfRepetitions = numberOfRepetitions;
+    this.jsPsych = jsPsych;
     this.itemIndexList = this.createItemIndexMap(this.patterns);
-    this._patternList = new Array(numberOfRepetitions).fill(structuredClone(this.patterns));
+    this.chunkedPatternList = this.fillChunkedPatternList();
+    this.patternList = this.chunkedPatternList.flat();
+    this.totalNumberOfPatterns = this.patternList.length;
+    this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
+    this.catchTrials = this.createCatchTrials(); //temporary with ping for testing
+    this.timeline;
+  }
+  fillChunkedPatternList() {
+    let chunkedPatternList = [];
+    for (let i = 0; i < this.numberOfRepetitions; i++) {
+      chunkedPatternList.push(structuredClone(this.patterns));
+    }
 
-    this._itemList = this.patternListToItemList(this.patternList, this.patternSize);
+    return chunkedPatternList;
   }
 
-  get patternList() {
-    // Returns the full pattern list
-    return this._patternList.flat();
-  }
+  createCatchTrials() {
+    let catchTrials = [];
+    const catchSyllable = "woef";
+    this.patterns.forEach((pattern) => {
+      // Determine the number of stimuli in the current pattern
+      const stimuliKeys = Object.keys(pattern).filter((key) => key.startsWith("stimulus"));
+      stimuliKeys.forEach((stimulusKey) => {
+        // Clone the current pattern to create a catch trial
+        const catchTrial = { ...pattern };
 
-  get itemList() {
-    return this.patternListToItemList(this.patternList, this.patternSize);
-  }
+        // Replace the current stimulus with the catch syllable
+        catchTrial[stimulusKey] = catchSyllable;
+        catchTrial["isCatchTrial"] = true;
+        // Add the catch trial to the list
+        catchTrials.push(catchTrial);
+      });
+    });
 
+    fischerYatesShuffle(catchTrials);
+    return catchTrials;
+  }
   get patternListNumbered() {
     let numberedList = [];
     this.patternList.forEach((pattern) => {
@@ -39,16 +65,52 @@ export class Stream {
 
     return numberedList;
   }
+  insertCatchTrials() {
+    // very specific to this experiment, think about making it modular
+    const minDistance = 5; // minimum gap between consecutive catch trials
+    const numberOfCatchTrials = this.catchTrials.length;
+    let insertedIndexes = [];
 
+    for (let catchTrial = 0; catchTrial < numberOfCatchTrials; catchTrial++) {
+      let insertLocation;
+      let tooClose;
+
+      do {
+        // get a random index from the pattern list, adjust for the length after insertions
+        insertLocation = getRandomInt(0, this.totalNumberOfPatterns - 1);
+
+        // Check if the current catch trial is within the minimum distance
+        tooClose = insertedIndexes.some((index) => Math.abs(index - insertLocation) <= minDistance);
+      } while (tooClose);
+
+      // Insert the catch trial at the specified location
+      this.patternList.splice(insertLocation, 0, this.catchTrials[catchTrial]);
+      // Increment the indexes that are >= insertLocation (because they shift due to the insertion)
+      insertedIndexes = insertedIndexes.map((index) => (index >= insertLocation ? index + 1 : index));
+      insertedIndexes.push(insertLocation);
+      insertedIndexes.sort((a, b) => a - b);
+    }
+    console.log(insertedIndexes);
+
+    this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
+  }
   patternListToItemList(patternList, patternSize) {
     // Returns the full pattern list in a 1D array, per item (e.g., for looping)
     const flatArray = patternList.reduce((result, pattern) => {
       for (let i = 1; i <= patternSize; i++) {
-        const itemIndex = this.itemIndexList[pattern[`stimulus${i}`]];
+        let itemIndex = this.itemIndexList[pattern[`stimulus${i}`]];
+        if (itemIndex === undefined) {
+          itemIndex = "catch";
+        }
+        let isCatchTrial = false;
+        if (itemIndex === "catch") {
+          isCatchTrial = true;
+        }
         result.push({
           stimulus: pattern[`stimulus${i}`],
-          item_index: itemIndex,
-          pattern_index: pattern.index,
+          itemIndex: itemIndex,
+          patternIndex: pattern.index,
+          isCatchTrial: isCatchTrial,
         });
       }
       return result;
@@ -66,6 +128,7 @@ export class Stream {
       patternObject.index = index + startIndex;
       pattern.forEach((item, itemIndex) => {
         patternObject[`stimulus${itemIndex + 1}`] = item;
+        patternObject["isCatchTrial"] = false;
       });
       patternArray.push(patternObject);
     });
@@ -73,13 +136,65 @@ export class Stream {
     return patternArray;
   }
 
-  convertToStimulusList(pathStimuli, fileFormat) {
+  createTimeline(assetPath, fileFormat) {
+    let streamInstance = this; // bind this to stream instance for use in jspsych plugins
     // convert to stimulus list expected by jsPsych
     // add path to object {stimulus: path/stimulus}
     // add file extension/format
-    let stimulusList = this.itemList.map((item) => ({ stimulus: pathStimuli + item.stimulus + fileFormat }));
-    streamTimeline.timeline = stimulusList;
-    return streamTimeline;
+    let stimulusList = this.itemList.map((item) => ({
+      itemIndex: item.itemIndex,
+      patternIndex: item.patternIndex,
+      stimulus: assetPath + item.stimulus + fileFormat,
+      isCatchTrial: item.isCatchTrial,
+      on_start: () => {
+        if (item.isCatchTrial) {
+          startCatchTrial();
+        }
+      },
+    }));
+    stimulusList.forEach((item) => {
+      if (item.isCatchTrial) {
+        item.itemIndex = "catch";
+      }
+    });
+
+    let tempStream = {
+      type: AudioKeyboardResponsePlugin,
+      prompt: "X",
+      choices: "NO_KEYS",
+      trial_ends_after_audio: true,
+      timeline: stimulusList,
+      on_finish: function () {
+        let correctResponses = 0;
+        let tooSlowResponses = 0;
+        let incorrectResponses = 0;
+
+        catchTrialResponseList.forEach((response) => {
+          if (response.isCatchTrial) {
+            if (response.correct && !response.missed) {
+              correctResponses++;
+            } else if (response.missed) {
+              tooSlowResponses++;
+            }
+          } else if (!response.correct && !response.missed) {
+            incorrectResponses++;
+          }
+        });
+
+        const summary = {
+          totalCatchTrials: correctResponses + tooSlowResponses,
+          correctResponses: correctResponses,
+          tooSlowResponses: tooSlowResponses,
+          incorrectResponses: incorrectResponses,
+        };
+
+        streamInstance.jsPsych.data.write({
+          catchTrialSummary: summary,
+        });
+      },
+    };
+
+    this.timeline = tempStream;
   }
   createItemIndexMap(patterns) {
     let itemIndexMap = new Map();
@@ -132,7 +247,7 @@ export class Stream {
     for (let chunkIndex = 0; chunkIndex < this.numberOfRepetitions; chunkIndex += shuffleInterval) {
       // Get the chunk, make it flat so the pattern are combined into a 2D array
       // (Note to self: If the last chunk is smaller, slice only takes the remainder of the array)
-      let chunk = structuredClone(this._patternList.slice(chunkIndex, chunkIndex + shuffleInterval).flat());
+      let chunk = structuredClone(this.chunkedPatternList.slice(chunkIndex, chunkIndex + shuffleInterval).flat());
 
       let shuffleComplete = false;
 
@@ -165,7 +280,9 @@ export class Stream {
       }
     }
 
-    this._patternList = shuffledList;
+    this.chunkedPatternList = shuffledList;
+    this.patternList = this.chunkedPatternList.flat();
+    this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
   }
 }
 function hasPatternRepetitions(array) {
@@ -219,7 +336,7 @@ function flattenPatternList(patternList, patternSize) {
       result.push({
         name: pattern[`stimulus${i}`],
         itemIndex: itemIndex,
-        pattern_index: pattern.index,
+        patternIndex: pattern.index,
       });
     }
     return result;

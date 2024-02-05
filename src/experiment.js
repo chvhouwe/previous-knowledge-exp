@@ -12,14 +12,24 @@ import "../styles/main.scss";
 
 import PreloadPlugin from "@jspsych/plugin-preload";
 import { initJsPsych } from "jspsych";
-import { goodbyeTrial, setFullscreen, welcomeTrial } from "./modules/trials.js";
+import {
+  goodbyeTrial,
+  setFullscreen,
+  streamInstructions,
+  sicrInstructions,
+  afcInstructions,
+} from "./modules/instruction.js";
 import { Stream } from "./modules/stream.js";
 import { AfcTask } from "./modules/afc.js";
 import { SicrTask } from "./modules/sicr.js";
-import AudioKeyboardResponsePlugin from "@jspsych/plugin-audio-keyboard-response";
-import { damerauLevenshtein } from "./modules/helper-functions.js";
+import { selectTriplets } from "./modules/retest.js";
+
+import { getBrowserInfo } from "./modules/helper-functions.js";
 import { generateCombinations } from "./modules/helper-functions.js";
-import { createInstructions } from "./modules/instructions.js";
+import { catchTrialResponseList, numberOfCatchTrials } from "./modules/catch-trial-manager.js";
+import { recognitionTrialList, completionTrialList } from "./modules/trials.js";
+
+global.test = "test";
 
 /**
  * This function will be executed by jsPsych Builder and is expected to run the jsPsych experiment
@@ -32,6 +42,11 @@ export async function run({ assetPaths, input = {}, environment, title, version 
       jsPsych.data.displayData("csv");
     },
   });
+  const browserInfo = getBrowserInfo();
+  const sonaID = parseInt(jsPsych.data.getURLVariable("SONA_ID"));
+  jsPsych.data.addProperties({ sonaId: sonaID, browser: browserInfo.browser, browserVersion: browserInfo.version });
+  console.log(sonaID);
+  console.log(browserInfo.browser);
 
   // Stimulus data
   const assetPath = "assets/";
@@ -52,62 +67,49 @@ export async function run({ assetPaths, input = {}, environment, title, version 
    ****************** EXPOSURE *******************
    */
   // Patterns that are used for exposure
+
   const patterns = [
-    ["Ba", "Lu", "Gi"],
-    ["Ze", "Ta", "Pu"],
-    ["Wi", "Ke", "Fo"],
     ["Ho", "Di", "Ve"],
     ["Di", "Ho", "Mu"],
+    ["Mu", "Ve", "Ho"],
+    ["Ve", "Mu", "Di"],
+    ["Ba", "Lu", "Gi"],
+    ["Ze", "Ta", "Pu"],
+    ["So", "Ne", "Ja"],
+    ["Wi", "Ke", "Fo"],
+  ];
+
+  const sicrChunkTrials = [
+    ["Ba", "Lu", "Gi", "Ze", "Ta", "Pu"],
+    ["Ba", "Lu", "Gi", "Di", "Ho", "Mu"],
+    ["Ze", "Ta", "Pu", "So", "Ne", "Ja"],
+    ["Ze", "Ta", "Pu", "Mu", "Ve", "Ho"],
+    ["So", "Ne", "Ja", "Wi", "Ke", "Fo"],
+    ["So", "Ne", "Ja", "Ve", "Mu", "Di"],
+    ["Wi", "Ke", "Fo", "Ho", "Di", "Ve"],
+    ["Wi", "Ke", "Fo", "Ba", "Lu", "Gi"],
+    ["Ho", "Di", "Ve", "Ze", "Ta", "Pu"],
+    ["Ho", "Di", "Ve", "Di", "Ho", "Mu"],
+    ["Di", "Ho", "Mu", "So", "Ne", "Ja"],
+    ["Di", "Ho", "Mu", "Mu", "Ve", "Ho"],
+    ["Mu", "Ve", "Ho", "Wi", "Ke", "Fo"],
+    ["Mu", "Ve", "Ho", "Ve", "Mu", "Di"],
+    ["Ve", "Mu", "Di", "Ho", "Di", "Ve"],
+    ["Ve", "Mu", "Di", "Ba", "Lu", "Gi"],
   ];
 
   // Create the stream with patternlist and how many times they must be repeated
-  const stream = new Stream(patterns, 1);
+  const stream = new Stream(jsPsych, patterns, 75);
   stream.shuffle(1); // the interval in which shuffles should occur (i.e., should each pattern occur before the same one can occur again)
-
-  // Convert the stream to an object jsPsych can use
-  let streamTimeline = stream.convertToStimulusList(assetPath, fileFormat);
+  stream.insertCatchTrials();
+  stream.createTimeline(assetPath, fileFormat);
 
   /*
    ************** AFC TASK ****************
    */
 
   const timeBetweenAlternatives = 1000; // within a trial (milliseconds)
-  // Recognition trials, the first item is the correct one (before shuffling)
-  const recognitionTrialList = [
-    [
-      ["Ba", "Lu", "Gi"],
-      ["Ba", "Ba", "Ba"],
-    ],
-    // [
-    //   ["Ba", "Lu", "Gi"],
-    //   ["Gi", "Gi", "Gi"],
-    // ],
-    // [
-    //   ["Ba", "Lu", "Gi"],
-    //   ["Ba", "Ba", "Ba"],
-    //   ["Gi", "Lu", "Gi"],
-    //   ["Ba", "Ba", "Ba"],
-    // ],
-    // [
-    //   ["Ba", "Lu", "Gi"],
-    //   ["Lu", "Lu", "Lu"],
-    //   ["Ba", "Ba", "Ba"],
-    //   ["Lu", "Lu", "Ba"],
-    // ],
-  ];
-
   const recognitionTrialCorrectList = 1;
-
-  const completionTrialList = [
-    [
-      ["Ba", "ping", "Gi"], // completion pattern
-      ["Lu", "Wi", "Wi"], // alternatives
-    ],
-    [
-      ["Ba", "ping"],
-      ["Lu", "Wi", "Wi"],
-    ],
-  ];
 
   const completionTrialCorrectList = 1;
 
@@ -127,10 +129,6 @@ export async function run({ assetPaths, input = {}, environment, title, version 
   /*
    ************ SICR TASK***************
    */
-  const sicrChunkTrials = [
-    ["Ba", "Lu", "Gi", "Wi", "Ke", "Fo"],
-    ["Wi", "Ke", "Fo", "Ba", "Lu", "Gi"],
-  ];
 
   const sicrFoilTrials = [
     ["Lu", "Gi", "Ba", "Ke", "Fo", "Wi"],
@@ -140,7 +138,16 @@ export async function run({ assetPaths, input = {}, environment, title, version 
   const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, sicrChunkTrials, sicrFoilTrials, true);
 
   // push all the tasks and trials to the experiment timeline
-  timeline.push(welcomeTrial, sicrTask.timeline, afcTask.timeline, goodbyeTrial);
+  timeline.push(
+    streamInstructions,
+    //stream.timeline,
+    sicrInstructions,
+    sicrTask.timeline,
+    afcInstructions,
+    afcTask.timeline,
+    goodbyeTrial
+  );
+  console.log(afcTask.timeline);
 
   await jsPsych.run(timeline);
 

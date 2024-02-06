@@ -54,7 +54,12 @@ export class SicrTask {
     for (let stim = 0; stim < sequenceLength; stim++) {
       stimulusList.push({ stimulus: this.assetPath + sequence[stim] + this.fileFormat, prompt: "X" });
     }
-
+    const readyAnnouncement = {
+      type: HtmlKeyboardResponsePlugin,
+      choices: " ",
+      stimulus: "",
+      prompt: "Duw op de spatiebalk als je klaar bent.",
+    };
     const stimuli = {
       type: AudioKeyboardResponsePlugin,
       timeline: stimulusList,
@@ -88,7 +93,10 @@ export class SicrTask {
 
     const trial = {
       type: AudioKeyboardResponsePlugin,
-      timeline: [stimuli, responseScreen],
+      timeline: [readyAnnouncement, stimuli, responseScreen],
+      data: {
+        task: "sicr",
+      },
     };
     return trial;
   }

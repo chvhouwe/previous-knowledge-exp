@@ -163,6 +163,13 @@ export class AfcTask {
       timeline: _stimulusList,
     };
 
+    const readyAnnouncement = {
+      type: HtmlKeyboardResponsePlugin,
+      choices: " ",
+      stimulus: "",
+      prompt: "Duw op de spatiebalk als je klaar bent.",
+    };
+
     // Create the response form (jspsych object)
     const responseScreen = {
       type: HtmlKeyboardResponsePlugin,
@@ -204,7 +211,10 @@ export class AfcTask {
 
     const trial = {
       type: AudioKeyboardResponsePlugin,
-      timeline: [stimulusList, responseScreen],
+      data: {
+        task: "afc",
+      },
+      timeline: [readyAnnouncement, stimulusList, responseScreen],
       loop_function: function (data) {
         let rt = afcTaskInstance.jsPsych.data.getLastTrialData().select("rt").values[0];
         totalRT += rt;
@@ -269,7 +279,12 @@ export class AfcTask {
       trial_ends_after_audio: true,
       timeline: _stimulusListPattern,
     };
-
+    const readyAnnouncement = {
+      type: HtmlKeyboardResponsePlugin,
+      choices: " ",
+      stimulus: "",
+      prompt: "Duw op de spatiebalk als je klaar bent.",
+    };
     const alternativesAnnouncement = {
       type: HtmlKeyboardResponsePlugin,
       choices: " ",
@@ -289,7 +304,7 @@ export class AfcTask {
       stimulus: responseMessage,
       choices: responseChoices,
       data: {
-        task: "AFC",
+        task: "afc",
         taskType: "pattern completion",
         numberOfAlternatives: numberOfAlternatives,
         trialCompleted: false,
@@ -330,7 +345,13 @@ export class AfcTask {
 
     const trial = {
       type: AudioKeyboardResponsePlugin,
-      timeline: [completionPatternStimuli, alternativesAnnouncement, alternativesStimuli, responseScreen],
+      timeline: [
+        readyAnnouncement,
+        completionPatternStimuli,
+        alternativesAnnouncement,
+        alternativesStimuli,
+        responseScreen,
+      ],
       loop_function: function (data) {
         let rt = afcTaskInstance.jsPsych.data.getLastTrialData().select("rt").values[0];
         totalRT += rt;
@@ -354,9 +375,9 @@ export class AfcTask {
   getResponseMessage(numberOfAlternatives, trialType) {
     if (trialType === "patternRecognition") {
       const alternativesMapping = {
-        2: "Duw op 1 of 2 om desbetreffend antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
-        3: "Duw op 1, 2 of 3 om desbetreffend antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
-        4: "Duw op 1, 2, 3 of 4 om desbetreffende antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
+        2: "Welke combinatie klinkt het meest bekend? <br>Duw op 1 of 2 om desbetreffend antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
+        3: "Welke combinatie klinkt het meest bekend? <br>Duw op 1, 2 of 3 om desbetreffend antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
+        4: "Welke combinatie klinkt het meest bekend? <br>Duw op 1, 2, 3 of 4 om desbetreffende antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
       };
 
       if (numberOfAlternatives in alternativesMapping) {

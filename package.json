@@ -14,6 +14,7 @@
     "@jspsych/plugin-html-keyboard-response": "^1.1.3",
     "@jspsych/plugin-instructions": "^1.1.4",
     "@jspsych/plugin-preload": "^1.1.2",
+    "@jspsych/plugin-survey": "^0.2.2",
     "@jspsych/plugin-survey-text": "^1.1.3",
     "jspsych": "^7.3.4"
   },

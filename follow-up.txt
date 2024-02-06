@@ -1,1 +1,9 @@
 Check catch trial storage, changed to on_timeline_finish:
+Add results flag to Higgins pitch response -> think about a good variable name for flag
+Add question at the end, what did you use to listen
+- demographics:
+	-> age
+	-> gender
+	-> neurological disorders
+	-> handedness
+

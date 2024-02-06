@@ -3,7 +3,7 @@ import { fischerYatesShuffle, getRandomInt } from "./random.js";
 import { streamTimeline } from "./instruction.js";
 import AudioKeyboardResponsePlugin from "@jspsych/plugin-audio-keyboard-response";
 const { startCatchTrial, catchTrialResponseList, awaitingResponse } = require("./catch-trial-manager.js");
-
+import HtmlKeyboardResponsePlugin from "@jspsych/plugin-html-keyboard-response";
 /**
  * Represents a stream/sequence made up of patterns
  */
@@ -90,7 +90,6 @@ export class Stream {
       insertedIndexes.push(insertLocation);
       insertedIndexes.sort((a, b) => a - b);
     }
-    console.log(insertedIndexes);
 
     this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
   }
@@ -138,10 +137,12 @@ export class Stream {
 
   createTimeline(assetPath, fileFormat) {
     let streamInstance = this; // bind this to stream instance for use in jspsych plugins
+
     // convert to stimulus list expected by jsPsych
     // add path to object {stimulus: path/stimulus}
     // add file extension/format
-    let stimulusList = this.itemList.map((item) => ({
+    let _stimulusList = this.itemList.map((item) => ({
+      type: AudioKeyboardResponsePlugin,
       itemIndex: item.itemIndex,
       patternIndex: item.patternIndex,
       stimulus: assetPath + item.stimulus + fileFormat,
@@ -152,18 +153,32 @@ export class Stream {
         }
       },
     }));
-    stimulusList.forEach((item) => {
+    _stimulusList.forEach((item) => {
       if (item.isCatchTrial) {
         item.itemIndex = "catch";
       }
     });
 
-    let tempStream = {
+    const stimulusList = {
       type: AudioKeyboardResponsePlugin,
       prompt: "X",
       choices: "NO_KEYS",
       trial_ends_after_audio: true,
-      timeline: stimulusList,
+      timeline: _stimulusList,
+    };
+
+    const readyAnnouncement = {
+      type: HtmlKeyboardResponsePlugin,
+      choices: " ",
+      stimulus: "",
+      prompt: "Duw op de spatiebalk als je klaar bent.",
+    };
+    let tempStream = {
+      type: AudioKeyboardResponsePlugin,
+      data: {
+        task: "exposure",
+      },
+      timeline: [readyAnnouncement, stimulusList],
       on_timeline_finish: function () {
         let correctResponses = 0;
         let tooSlowResponses = 0;
@@ -186,6 +201,7 @@ export class Stream {
           correctResponses: correctResponses,
           tooSlowResponses: tooSlowResponses,
           incorrectResponses: incorrectResponses,
+          results: true,
         };
 
         streamInstance.jsPsych.data.write({

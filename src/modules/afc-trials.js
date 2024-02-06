@@ -206,5 +206,3 @@ const completionTrialListIndexed = [
 export const completionTrialList = completionTrialListIndexed.map((trial) =>
   trial.map((pattern) => pattern.map((index) => (index === -1 ? "woef" : items[index])))
 );
-
-console.log(completionTrialList);

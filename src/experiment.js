@@ -11,6 +11,7 @@
 import "../styles/main.scss";
 
 import PreloadPlugin from "@jspsych/plugin-preload";
+
 import { initJsPsych } from "jspsych";
 import {
   goodbyeTrial,
@@ -19,7 +20,12 @@ import {
   sicrInstructions,
   afcInstructions,
   hpInstructions,
+  welcomeInstructions,
+  sicrPracticeInstructions,
+  sicrTaskStartInstructions,
+  soundCheckInstructions,
 } from "./modules/instruction.js";
+import { demographics } from "./modules/survey.js";
 import { Stream } from "./modules/stream.js";
 import { AfcTask } from "./modules/afc.js";
 import { SicrTask } from "./modules/sicr.js";
@@ -31,6 +37,7 @@ import { catchTrialResponseList, numberOfCatchTrials } from "./modules/catch-tri
 import { recognitionTrialList, completionTrialList } from "./modules/afc-trials.js";
 import { ChunkTrialList, foilTrialList } from "./modules/sicr-trials.js";
 import { createHugginsPitchTask } from "./modules/huggins-pitch";
+import { createSoundCheck } from "./modules/sound-check.js";
 
 /**
  * This function will be executed by jsPsych Builder and is expected to run the jsPsych experiment
@@ -43,11 +50,12 @@ export async function run({ assetPaths, input = {}, environment, title, version 
       jsPsych.data.displayData("csv");
     },
   });
+
+  // Get user info, add to data file
+  // TODO condition retest
   const browserInfo = getBrowserInfo();
   const sonaID = parseInt(jsPsych.data.getURLVariable("SONA_ID"));
   jsPsych.data.addProperties({ sonaId: sonaID, browser: browserInfo.browser, browserVersion: browserInfo.version });
-  console.log(sonaID);
-  console.log(browserInfo.browser);
 
   // Stimulus data
   const assetPath = "assets/";
@@ -75,11 +83,10 @@ export async function run({ assetPaths, input = {}, environment, title, version 
     "HP_2_2",
     "HP_2_3",
   ]);
-  console.log(hugginsTimeline);
 
-  /*
-   ****************** EXPOSURE *******************
-   */
+  const soundCheck = createSoundCheck(jsPsych, assetPath, fileFormat, "woef");
+
+  //EXPOSURE
   // Patterns that are used for exposure
 
   const patterns = [
@@ -99,14 +106,10 @@ export async function run({ assetPaths, input = {}, environment, title, version 
   stream.insertCatchTrials();
   stream.createTimeline(assetPath, fileFormat);
 
-  /*
-   ************** AFC TASK ****************
-   */
-
+  // AFC task
   const timeBetweenAlternatives = 1000; // within a trial (milliseconds)
-  const recognitionTrialCorrectList = 1;
-
-  const completionTrialCorrectList = 1;
+  const recognitionTrialCorrectList = 1; // The correct position is always 1
+  const completionTrialCorrectList = 1; // The correct position is always 1
 
   const afcTask = new AfcTask(
     jsPsych,
@@ -118,34 +121,32 @@ export async function run({ assetPaths, input = {}, environment, title, version 
     completionTrialCorrectList,
     true,
     true,
-    1000
+    timeBetweenAlternatives
   );
 
-  /*
-   ************ SICR TASK***************
-   */
-
-  const sicrFoilTrials = [
-    ["Lu", "Gi", "Ba", "Ke", "Fo", "Wi"],
-    ["Gi", "Wi", "Lu", "Fo", "Ke", "Ba"],
-  ];
-
+  //SICR task
   const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, ChunkTrialList, foilTrialList, true);
 
   // push all the tasks and trials to the experiment timeline
   timeline.push(
-    hpInstructions,
-    hugginsTimeline,
-    //streamInstructions,
-    //stream.timeline,
-    //sicrInstructions,
-    //sicrTask.timeline,
-    //afcInstructions,
-    //afcTask.timeline,
-    goodbyeTrial
+    // welcomeInstructions,
+    demographics
+    // soundCheckInstructions,
+    // soundCheck,
+    // setFullscreen,
+    // hpInstructions,
+    // hugginsTimeline,
+    // streamInstructions,
+    // stream.timeline,
+    // sicrInstructions,
+    // sicrPracticeInstructions,
+    // // sicrPractice task- TODO
+    // sicrTaskStartInstructions,
+    // sicrTask.timeline,
+    // afcInstructions,
+    // afcTask.timeline,
+    // goodbyeTrial
   );
-  console.log(afcTask.timeline);
-  console.log(sicrTask.timeline);
 
   await jsPsych.run(timeline);
 

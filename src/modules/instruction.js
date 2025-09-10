@@ -6,7 +6,7 @@ import InstructionsPlugin from "@jspsych/plugin-instructions";
 import { calculateNextPart } from "./date-functions";
 
 const assetPath = "assets/";
-function createInstructions(pages, allowBackward, clickableNavigation) {
+export function createInstructions(pages, allowBackward, clickableNavigation) {
   const instructions = {
     type: InstructionsPlugin,
     data: {
@@ -28,9 +28,9 @@ const welcomePage1 =
   "<div style='text-align: left; width:600px;'>" +
   "<b> Welkom </b><br><br>" +
   "Deze studie bestaat uit 4 delen. <br>" +
-  "<b>1.</b> Enkele vragen over jou + testen van de geluidskwaliteit. <br>" +
-  "<b>2.</b> Een geluid detecteren. <br>" +
-  "<b>3.</b> Een geheugentaak.  <br>" +
+  "<b>1.</b> Enkele vragen over jou. <br>" +
+  "<b>2.</b> Testen van de geluidskwaliteit. <br>" +
+  "<b>3.</b> Een geluid detecteren. <br>" +
   "<b>4.</b> Een meerkeuzetaak. <br><br>" +
   "Meer info volgt als het deel start.<br>" +
   "</div>";
@@ -40,7 +40,8 @@ const welcomePage2 =
   "<b> Welkom </b><br><br>" +
   "Gelieve het volgende te doen voor je start met de studie:<br>" +
   "<b>1.</b> Sluit alle browser tabbladen, dit is belangrijk om het experiment vlot te laten verlopen.<br>" +
-  "<b>2.</b> Verwijder zaken die voor afleiding kunnen zorgen (geen TV, gsm, ...) zodat je klaar bent om je te concentreren op de taak.<br><br>" +
+  "<b>2.</b> Verwijder zaken die voor afleiding kunnen zorgen (geen TV, gsm, ...) zodat je klaar bent om je te concentreren op de taak.<br>" +
+  "<b>3.</b> Sluit je hoofdtelefoon of oortjes aan.<br><br>" +
   "Klik op volgende om verder te gaan naar deel 1.<br>" +
   "</div>";
 
@@ -69,11 +70,11 @@ export const setFullscreen = {
 const hpPage1 =
   "<div style='text-align: left; width:600px;'>" +
   "<b> HOOFDTELEFOON CHECK </b><br><br>" +
-  "Voor je aan de studie begint volgt nog een korte test om zeker te zijn" +
-  "dat jouw hoofdtelefoon functioneert. Je krijgt drie ruissignalen te horen, in één " +
-  "ruissignaal zit een subtiele toon verborgen. Jij moet aangeven in welk ruissignaal" +
+  "Voor je aan de studie begint volgt nog een korte test om zeker te zijn " +
+  "dat jouw hoofdtelefoon of oortjes functioneren. Je krijgt drie ruissignalen te horen, in één " +
+  "ruissignaal zit een subtiele toon verborgen. Jij moet aangeven in welk ruissignaal " +
   "de toon te horen is. Antwoorden kan met de nummertoetsen:<img src='assets/numberkeys_study.png'></img><br><br>" +
-  "Klik op volgende om te starten. Opgelet, je kan maar één keer luisteren!" +
+  "Dit zal je 6 keer doen in totaal. Klik op volgende om te starten. Opgelet, je kan maar één keer luisteren!" +
   "</div>";
 
 export const hpInstructions = createInstructions([hpPage1], true, true);
@@ -83,50 +84,21 @@ export const hpInstructions = createInstructions([hpPage1], true, true);
 const streamPage1 =
   "<div style='text-align: left; width:600px;'>" +
   "<b> DETECTIE TAAK </b><br><br>" +
-  "De detectie taak gaat nu starten, dit duurt ongeveer 10 minuten. <br>Gedurende deze taak moet je aandachtig luisteren" +
-  " en elke keer je een 'woef' hoort moet je duwen op de spatiebalk!<br>" +
-  "Plaats je hand alvast op de spatiebalk en klik op 'volgende' om te starten." +
+  "De detectie taak gaat nu starten. Je gaat luisteren naar een lange reeks met lettergrepen, dit duurt ongeveer 10 minuten. <br> Gedurende deze taak moet je aandachtig luisteren" +
+  " en elke keer je de lettergreep 'Xu' hoort moet je duwen op de spatiebalk. Probeer zo snel mogelijk te reageren, je reactietijden worden opgeslagen!<br>" +
+  "Op de volgende pagina laten we je het doelwit 'Xu' horen, je kan dit zo vaak herbeluisteren als je wil." +
   "</div>";
 
 export const streamInstructions = createInstructions([streamPage1], true, true);
 
-// SICR related instructions
-const sicrPage1 =
-  "<div style='text-align: left; width:600px;'>" +
-  "<b>GEHEUGEN TAAK</b><br><br>" +
-  "In deze taak krijg je een reeks lettergrepen te horen. Jij moet deze proberen onthouden en achteraf in te vullen." +
-  "Voordat de taak start, zal je 6 oefentrials voltooien, daarna start de echte taak die bestaat uit 16 trials.<br>" +
-  "Klik op 'volgende' om te starten." +
-  "</div>";
-
-export const sicrInstructions = createInstructions([sicrPage1], true, true);
-
-// SICR practice instructions
-const sicrPracticePage1 =
-  "<div style='text-align: left; width:600px;'>" +
-  "<b>Oefenronde</b><br><br>" +
-  "Voor je begint aan de taak, krijg je eerst enkele oefenrondes." +
-  "Klik op volgende om te starten. Opgelet, je kan maar één keer luisteren!" +
-  "</div>";
-export const sicrPracticeInstructions = createInstructions([sicrPracticePage1], true, true);
-
-// SICR Start real task instructions
-const sicrTaskStartPage1 =
-  "<div style='text-align: left; width:600px;'>" +
-  "<b>Start van de geheugentaak </b><br><br>" +
-  "De oefenrondes zijn voorbij en nu start de taak. Klik op volgende om te starten. Opgelet, je kan maar één keer luisteren!" +
-  "</div>";
-
-export const sicrTaskStartInstructions = createInstructions([sicrTaskStartPage1], true, true);
-// AFC related instructions
 const afcPage1 =
   "<div style='text-align: left; width:600px;'>" +
   "<b> MEERKEUZE TAAK </b><br><br>" +
-  "In deze taak zal je steeds moeten kiezen tussen meerdere opties. Er zijn twee soorten trials:<br>" +
-  "<b>1. Combinatie kiezen:</b> Je hoort meerdere combinaties van lettergrepen, jij moet aangeven welke het meest bekend klinkt.<br>" +
-  "<b>2. Combinatie aanvullen:</b> Je hoort een combinatie van lettergrepen, waar één lettergreep ontbreekt (aangeduid door een 'woef' geluid).<br>" +
+  "In deze taak zal je steeds moeten kiezen tussen meerdere opties. Er zijn twee soorten vragen:<br>" +
+  "<b>1. Patroon kiezen:</b> Je hoort meerdere patronen van lettergrepen (bv. 'ri-xa-qu' en 'xi-ju-la'), jij moet aangeven welke het meest bekend klinkt.<br>" +
+  "<b>2. Patroon aanvullen:</b> Je hoort een patroon van lettergrepen, waar één lettergreep ontbreekt. Dit wordt aangeduid met een 'Ping' geluid (bv. 'ri-ping-qu').<br>" +
   "Jij kan dan achteraf kiezen welke lettergreep volgens jou ontbreekt.<br><br>" +
-  "Antwoorden kan met de nummertoetsen (je hoeft de shift-toets niet in te drukken): <img src='assets/numberkeys_study.png'></img><br><br>" +
+  "Antwoorden kan met de nummertoetsen na het beluisteren van de vraag (je hoeft de shift-toets niet in te drukken): <img src='assets/numberkeys_study.png'></img><br><br>" +
   "Klik op 'volgende' om te starten." +
   "</div>";
 
@@ -140,7 +112,7 @@ const goodbyeText =
   "<div style='text-align: left; width:600px;'>" +
   "<b> Einde experiment </b><br><br>" +
   "Bedankt voor je deelname aan deel 1 van de studie! <br>" +
-  "Je kan de studie nu afsluiten, <b>wacht zeker tot alle data opgeslagen is. </b><br>" +
+  "Wacht even voor je deze pagina afsluit (+- 30 seconden), zodat alle data zeker opgeslagen is. <br>" +
   "<b>" +
   nextPartTime +
   "</b>" +

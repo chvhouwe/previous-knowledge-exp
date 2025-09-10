@@ -1,44 +1,270 @@
-"use strict";
-import { fischerYatesShuffle, getRandomInt } from "./random.js";
-import { streamTimeline } from "./instruction.js";
-import AudioKeyboardResponsePlugin from "@jspsych/plugin-audio-keyboard-response";
-const { startCatchTrial, catchTrialResponseList, awaitingResponse } = require("./catch-trial-manager.js");
+import { fischerYatesShuffle, getRandomInt } from "./random";
+import AudioKeyboardResponsePlugin from "@jspsych/plugin-audio-button-response";
 import HtmlKeyboardResponsePlugin from "@jspsych/plugin-html-keyboard-response";
+import { startCatchTrial, CATCH_TRIAL_RESPONSE_LIST } from "./catch-trial-manager";
+import ImageKeyboardResponsePlugin from "@jspsych/plugin-image-keyboard-response";
+import HtmlButtonResponsePlugin from "@jspsych/plugin-html-button-response";
+export let STREAM_ACTIVE = false;
 /**
- * Represents a stream/sequence made up of patterns
+ * @class Stream
+ * @classdesc A class for creating a stream of stimuli for the Exposure task.
+ * @param {Object} jsPsych - A reference to the jsPsych library.
+ * @param {Object} streamInfo - Information about the stream, containing:
+ *   @param {String} streamInfo.assetPath - The base path to the assets used in the stream.
+ *   @param {String} streamInfo.fileFormat - The format of the files (e.g., '.wav', '.png').
+ *   @param {Array} streamInfo.patterns - An array of patterns that make up the stream.
+ *   @param {Number} streamInfo.numberOfRepetitions - How many times the patterns are repeated in the stream.
+ *   @param {Number} streamInfo.modality - Visual or auditory
  */
 export class Stream {
-  /**
-   * Constructs a new Stream with the specified patterns and numberOfRepetitions.
-   *
-   * @param {Array} patterns - The list of unique patterns to be included in the stream.
-   * @param {number} numberOfRepetitions - The number of times the entire pattern list should be repeated.
-   */
-  constructor(jsPsych, patterns, numberOfRepetitions) {
-    this.patternSize = patterns[0].length;
-    this.patterns = this.createPatternObjects(patterns);
-    this.numberOfRepetitions = numberOfRepetitions;
+  constructor(jsPsych, streamInfo) {
     this.jsPsych = jsPsych;
-    this.itemIndexList = this.createItemIndexMap(this.patterns);
-    this.chunkedPatternList = this.fillChunkedPatternList();
-    this.patternList = this.chunkedPatternList.flat();
-    this.totalNumberOfPatterns = this.patternList.length;
-    this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
-    this.catchTrials = this.createCatchTrials(); //temporary with ping for testing
-    this.timeline;
+    this.streamInfo = streamInfo;
+    this.patternSize = streamInfo.patterns[0].length;
+    this.patterns = this.createPatternObjects(streamInfo.patterns);
+    this.numberOfRepetitions = streamInfo.numberOfRepetitions;
+    this.numberOfPatterns = this.numberOfRepetitions * this.patterns.length;
+    this.catchTrials = this.createCatchTrials();
+    this.itemIndexList = this.createItemIndexList();
+    this.patternList = [];
+    this.itemList = [];
+    this.timeline = null;
+    this.createStream();
   }
-  fillChunkedPatternList() {
+
+  createStream() {
+    // Create a stream, with several chunks (based on )
+    this.chunkedPatternList = this.createChunkedPatternList();
+    this.insertCatchTrials(this.chunkedPatternList);
+
+    this.shuffle(this.chunkedPatternList);
+    this.patternList = this.chunkedPatternList.flat();
+
+    this.itemList = this.createItemList(this.patternList);
+
+    this.createTimeline();
+  }
+
+  shuffle(chunkedPatternList) {
+    let previousChunk = null;
+    chunkedPatternList.forEach((chunk) => {
+      let isValidShuffle = false;
+
+      while (!isValidShuffle) {
+        fischerYatesShuffle(chunk);
+
+        if (!this.violatesRestrictions(chunk, previousChunk)) isValidShuffle = true;
+      }
+
+      // After processing the current chunk, set it as the previous chunk for the next iteration
+      previousChunk = chunk;
+    });
+  }
+
+  // a function that checks whether the stream breaks no restrictions based on some conditions
+  violatesRestrictions(patternList, previousPatternList) {
+    const numberOfPatterns = patternList.length;
+
+    // Restriction 1, no pattern repetitions
+    for (let pattern = 1; pattern < numberOfPatterns; pattern++) {
+      // get the current and last pattern
+      const currentPattern = patternList[pattern].patternIndex;
+      const previousPattern = patternList[pattern - 1].patternIndex;
+
+      // return true if rule is violated
+      if (currentPattern === previousPattern) {
+        return true;
+      }
+    }
+
+    // Restriction 2, no item repetitions
+    const itemList = this.createItemList(patternList);
+    const numberOfItems = itemList.length;
+    for (let item = 1; item < numberOfItems; item++) {
+      const currentItem = itemList[item].itemIndex;
+      const previousItem = itemList[item - 1].itemIndex;
+
+      // return true if rule is violated
+      if (currentItem === previousItem) {
+        return true;
+      }
+    }
+
+    // Restriction 1 and 2, but between chunks (when concatenating them in the end)
+
+    // Only compare if there is a previous pattern list (i.e., it is not the first chunk)
+    if (previousPatternList) {
+      // Patterns
+      const firstPatternOfCurrentChunk = patternList[0].patternIndex;
+      const secondPatternOfCurrentChunk = patternList[1].patternIndex;
+      const lastPatternOfPreviousChunk = previousPatternList[previousPatternList.length - 1].patternIndex;
+      const secondLastPatternOfPreviousChunk = previousPatternList[previousPatternList.length - 2].patternIndex;
+
+      if (
+        firstPatternOfCurrentChunk === lastPatternOfPreviousChunk ||
+        firstPatternOfCurrentChunk === secondLastPatternOfPreviousChunk ||
+        secondPatternOfCurrentChunk === lastPatternOfPreviousChunk
+      ) {
+        return true;
+      }
+
+      // items
+      const previousItemList = this.createItemList(previousPatternList);
+      const firstItemOfCurrentChunk = itemList[0].itemIndex;
+      const lastItemOfPreviousChunk = previousItemList[previousItemList.length - 1].itemIndex;
+
+      if (firstItemOfCurrentChunk === lastItemOfPreviousChunk) {
+        return true;
+      }
+    }
+
+    // make sure that catch trials are not too close (for overlapping event handlers)
+    let distances = []; // Holds the position of catch trials in a chunk
+    for (let pattern = 0; pattern < numberOfPatterns; pattern++) {
+      if (patternList[pattern].isCatchTrial) distances.push(pattern);
+    }
+    for (let i = 1; i < distances.length; i++) {
+      if (distances[i] - distances[i - 1] < 5) {
+        return true;
+      }
+    }
+
+    // Make sure that catch trials cant be too close over chunks
+    if (distances[0] < 3 || distances[distances.length - 1] > patternList.length - 3) return true;
+
+    // second order regularity (A B A)
+    for (let pattern = 2; pattern < numberOfPatterns; pattern++) {
+      const firstPattern = patternList[pattern - 2].patternIndex;
+      const thirdPattern = patternList[pattern].patternIndex;
+
+      if (firstPattern === thirdPattern) {
+        return true;
+      }
+    }
+
+    // No restrictions are violated, jeej...
+    return false;
+  }
+
+  // Method to create a timeline for jsPsych
+  createTimeline() {
+    // Variable that holds the type of plugin (visual or auditory for now)
+    const pluginType =
+      this.streamInfo.modality === "auditory" ? AudioKeyboardResponsePlugin : ImageKeyboardResponsePlugin;
+    // convert to stimulus list expected by jsPsych
+    // add path to object {stimulus: path/stimulus}
+    // add file extension/format
+    let _stimulusList = this.itemList.map((item) => ({
+      type: pluginType,
+      itemIndex: item.itemIndex,
+      patternIndex: item.patternIndex,
+      stimulus: this.streamInfo.assetPath + item.stimulus + this.streamInfo.fileFormat,
+      isCatchTrial: item.isCatchTrial,
+
+      on_start: () => {
+        if (item.isCatchTrial) {
+          startCatchTrial();
+        }
+      },
+    }));
+
+    _stimulusList.forEach((item) => {
+      if (item.isCatchTrial) {
+        item.itemIndex = "catch";
+      }
+    });
+
+    const stimulusList = {
+      type: pluginType,
+      prompt: "+",
+      choices: [],
+      on_timeline_start: () => {
+        STREAM_ACTIVE = true;
+      },
+      on_timeline_finish: () => {
+        STREAM_ACTIVE = false;
+      },
+      timeline: _stimulusList,
+    };
+
+    if (this.streamInfo.modality === "auditory") {
+      stimulusList.trial_ends_after_audio = true;
+    }
+    if (this.streamInfo.modality === "visual") {
+      stimulusList.stimulus_duration = "500";
+      stimulusList.trial_duration = "500";
+    }
+
+    const readyAnnouncement = {
+      type: HtmlKeyboardResponsePlugin,
+      choices: " ",
+      stimulus: "",
+      prompt: "Duw op de spatiebalk als je klaar bent.",
+    };
+    const finishedAnnouncement = {
+      type: HtmlKeyboardResponsePlugin,
+      choices: " ",
+      stimulus: "",
+      data: {
+        task: "exposure_result",
+      },
+      prompt: "Deze taak is afgelopen, duw op op de spatiebalk om verder te gaan.",
+      on_finish: function (data) {
+        let correctResponses = 0;
+        let tooSlowResponses = 0;
+        let incorrectResponses = 0;
+
+        CATCH_TRIAL_RESPONSE_LIST.forEach((response, index) => {
+          if (index === 0) return; // Skip the first response (is from ready announcement)
+
+          if (response.isCatchTrial) {
+            if (response.correct && !response.missed) {
+              correctResponses++;
+            } else if (response.missed) {
+              tooSlowResponses++;
+            }
+          } else if (!response.correct && !response.missed) {
+            incorrectResponses++;
+          }
+        });
+
+        data.numberOfCatchTrials = correctResponses + tooSlowResponses;
+        data.correctResponses = correctResponses;
+        data.tooSlowResponses = tooSlowResponses;
+        data.incorrectResponses = incorrectResponses;
+        data.results = true;
+      },
+    };
+    let tempStream = {
+      type: pluginType,
+      data: {
+        task: "exposure",
+      },
+      timeline: [stimulusList, finishedAnnouncement], // ready announcement replaced by catch sound check
+    };
+
+    this.timeline = tempStream;
+  }
+
+  // Creates an array per repetition, for shuffling
+  // HARDCODED FOR NOW, does not account for: repetitions not matching chunks
+  createChunkedPatternList() {
     let chunkedPatternList = [];
-    for (let i = 0; i < this.numberOfRepetitions; i++) {
-      chunkedPatternList.push(structuredClone(this.patterns));
+    const numberOfChunks = this.numberOfRepetitions / this.streamInfo.chunkSize;
+
+    for (let chunkNumber = 0; chunkNumber < numberOfChunks; chunkNumber++) {
+      const chunk = new Array(this.streamInfo.chunkSize).fill(structuredClone(this.patterns)).flat();
+      chunkedPatternList.push(chunk);
     }
 
     return chunkedPatternList;
   }
 
+  // Creates catch trials from the pattern list (1 per pattern, for each position)
+  // The array is not yet shuffled
   createCatchTrials() {
     let catchTrials = [];
-    const catchSyllable = "woef";
+    const catchSyllable = "Xu";
     this.patterns.forEach((pattern) => {
       // Determine the number of stimuli in the current pattern
       const stimuliKeys = Object.keys(pattern).filter((key) => key.startsWith("stimulus"));
@@ -53,50 +279,76 @@ export class Stream {
         catchTrials.push(catchTrial);
       });
     });
-
-    fischerYatesShuffle(catchTrials);
     return catchTrials;
   }
-  get patternListNumbered() {
-    let numberedList = [];
-    this.patternList.forEach((pattern) => {
-      numberedList.push(pattern.index);
-    });
 
-    return numberedList;
-  }
-  insertCatchTrials() {
-    // very specific to this experiment, think about making it modular
-    const minDistance = 5; // minimum gap between consecutive catch trials
-    const numberOfCatchTrials = this.catchTrials.length;
-    let insertedIndexes = [];
+  // Inserts the catch trials into the chunked patternList
+  // HARDCODED FOR NOW
+  insertCatchTrials(chunkedPatternList) {
+    const numberOfChunks = this.streamInfo.numberOfRepetitions / this.streamInfo.chunkSize;
+    const numberOfCatchTrials = 24;
+    const maxCatchTrialsPerChunk = 2;
 
-    for (let catchTrial = 0; catchTrial < numberOfCatchTrials; catchTrial++) {
-      let insertLocation;
-      let tooClose;
+    // Shuffle the catch trials
+    fischerYatesShuffle(this.catchTrials);
 
-      do {
-        // get a random index from the pattern list, adjust for the length after insertions
-        insertLocation = getRandomInt(0, this.totalNumberOfPatterns - 1);
+    // Make a clone of catch trials (so that the original this.catchTrials doesnt get changed)
+    const _catchTrials = structuredClone(this.catchTrials);
 
-        // Check if the current catch trial is within the minimum distance
-        tooClose = insertedIndexes.some((index) => Math.abs(index - insertLocation) <= minDistance);
-      } while (tooClose);
-
-      // Insert the catch trial at the specified location
-      this.patternList.splice(insertLocation, 0, this.catchTrials[catchTrial]);
-      // Increment the indexes that are >= insertLocation (because they shift due to the insertion)
-      insertedIndexes = insertedIndexes.map((index) => (index >= insertLocation ? index + 1 : index));
-      insertedIndexes.push(insertLocation);
-      insertedIndexes.sort((a, b) => a - b);
+    // First, distribute one catch trial per chunk to ensure each chunk has at least one
+    for (let chunk = 0; chunk < numberOfChunks; chunk++) {
+      chunkedPatternList[chunk].push(_catchTrials.pop());
     }
 
-    this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
+    // Now, distribute the remaining catch trials randomly across the chunks
+    while (_catchTrials.length > 0) {
+      let randomChunkIndex = getRandomInt(0, numberOfChunks - 1);
+
+      // Ensure that there are no more than 2 catch trials per chunk
+      if (chunkedPatternList[randomChunkIndex].filter((item) => item.isCatchTrial).length < maxCatchTrialsPerChunk) {
+        chunkedPatternList[randomChunkIndex].push(_catchTrials.pop());
+      }
+    }
   }
-  patternListToItemList(patternList, patternSize) {
+
+  // Make objects from the pattern list (adds extra data such as item and pattern index)
+  createPatternObjects(patterns) {
+    const patternArray = [];
+    const startIndex = 1;
+
+    patterns.forEach((pattern, index) => {
+      const patternObject = {};
+      patternObject.patternIndex = index + startIndex;
+      pattern.forEach((item, itemIndex) => {
+        patternObject[`stimulus${itemIndex + 1}`] = item;
+        patternObject["isCatchTrial"] = false;
+      });
+      patternArray.push(patternObject);
+    });
+
+    return patternArray;
+  }
+  createItemIndexList() {
+    let itemIndexObject = {};
+    let currentIndex = 1; // Start indexing from 1
+
+    this.patterns.forEach((pattern) => {
+      Object.values(pattern).forEach((value) => {
+        if (typeof value === "string" && !itemIndexObject.hasOwnProperty(value)) {
+          itemIndexObject[value] = currentIndex++;
+        }
+      });
+    });
+
+    return itemIndexObject;
+  }
+
+  // Creates an item list from a patternlist
+  createItemList(patternList) {
+    // patternlist is a 2D array
     // Returns the full pattern list in a 1D array, per item (e.g., for looping)
     const flatArray = patternList.reduce((result, pattern) => {
-      for (let i = 1; i <= patternSize; i++) {
+      for (let i = 1; i <= this.patternSize; i++) {
         let itemIndex = this.itemIndexList[pattern[`stimulus${i}`]];
         if (itemIndex === undefined) {
           itemIndex = "catch";
@@ -108,7 +360,7 @@ export class Stream {
         result.push({
           stimulus: pattern[`stimulus${i}`],
           itemIndex: itemIndex,
-          patternIndex: pattern.index,
+          patternIndex: pattern.patternIndex,
           isCatchTrial: isCatchTrial,
         });
       }
@@ -117,254 +369,4 @@ export class Stream {
 
     return flatArray;
   }
-
-  createPatternObjects(patterns) {
-    const patternArray = [];
-    const startIndex = 1;
-
-    patterns.forEach((pattern, index) => {
-      const patternObject = {};
-      patternObject.index = index + startIndex;
-      pattern.forEach((item, itemIndex) => {
-        patternObject[`stimulus${itemIndex + 1}`] = item;
-        patternObject["isCatchTrial"] = false;
-      });
-      patternArray.push(patternObject);
-    });
-
-    return patternArray;
-  }
-
-  createTimeline(assetPath, fileFormat) {
-    let streamInstance = this; // bind this to stream instance for use in jspsych plugins
-
-    // convert to stimulus list expected by jsPsych
-    // add path to object {stimulus: path/stimulus}
-    // add file extension/format
-    let _stimulusList = this.itemList.map((item) => ({
-      type: AudioKeyboardResponsePlugin,
-      itemIndex: item.itemIndex,
-      patternIndex: item.patternIndex,
-      stimulus: assetPath + item.stimulus + fileFormat,
-      isCatchTrial: item.isCatchTrial,
-      on_start: () => {
-        if (item.isCatchTrial) {
-          startCatchTrial();
-        }
-      },
-    }));
-    _stimulusList.forEach((item) => {
-      if (item.isCatchTrial) {
-        item.itemIndex = "catch";
-      }
-    });
-
-    const stimulusList = {
-      type: AudioKeyboardResponsePlugin,
-      prompt: "X",
-      choices: "NO_KEYS",
-      trial_ends_after_audio: true,
-      timeline: _stimulusList,
-    };
-
-    const readyAnnouncement = {
-      type: HtmlKeyboardResponsePlugin,
-      choices: " ",
-      stimulus: "",
-      prompt: "Duw op de spatiebalk als je klaar bent.",
-    };
-    let tempStream = {
-      type: AudioKeyboardResponsePlugin,
-      data: {
-        task: "exposure",
-      },
-      timeline: [readyAnnouncement, stimulusList],
-      on_timeline_finish: function () {
-        let correctResponses = 0;
-        let tooSlowResponses = 0;
-        let incorrectResponses = 0;
-
-        catchTrialResponseList.forEach((response) => {
-          if (response.isCatchTrial) {
-            if (response.correct && !response.missed) {
-              correctResponses++;
-            } else if (response.missed) {
-              tooSlowResponses++;
-            }
-          } else if (!response.correct && !response.missed) {
-            incorrectResponses++;
-          }
-        });
-
-        const summary = {
-          totalCatchTrials: correctResponses + tooSlowResponses,
-          correctResponses: correctResponses,
-          tooSlowResponses: tooSlowResponses,
-          incorrectResponses: incorrectResponses,
-          results: true,
-        };
-
-        streamInstance.jsPsych.data.write({
-          catchTrialSummary: summary,
-        });
-      },
-    };
-
-    this.timeline = tempStream;
-  }
-  createItemIndexMap(patterns) {
-    let itemIndexMap = new Map();
-    let currentIndex = 1; // Start indexing from 1
-
-    patterns.forEach((pattern) => {
-      Object.values(pattern).forEach((value) => {
-        if (typeof value === "string" || value instanceof String) {
-          if (!itemIndexMap.has(value)) {
-            itemIndexMap.set(value, currentIndex++);
-          }
-        }
-      });
-    });
-
-    // Convert the Map to a plain object for the desired format
-    const resultObject = {};
-    itemIndexMap.forEach((index, stimulus) => {
-      resultObject[stimulus] = index;
-    });
-    return resultObject;
-  }
-
-  shuffle(
-    shuffleInterval,
-    allowPatternRepetitions = false,
-    allowSecondOrderPatternRepetitions = false,
-    allowItemRepetitions = false
-  ) {
-    /**
-     * Shuffles the stream at a specified interval.
-     *
-     * @param {number} shuffleInterval - The interval at which the stream should be shuffled.
-     *    For example, if value = 1: Every pattern has to appear once before the same can appear again
-     * @param {boolean} [allowPatternRepetitions=false] - Whether to allow repetitions of patterns in the stream. Default = false.
-     * @param {boolean} [allowSecondOrderPatternRepetitions=false] - Whether to allow higher order repetitions, e.g., A-B-A-B. Default = false.
-     * @param {boolean} [allowItemRepetitions=false] - Whether to allow repetitions of individual items (within patterns) in the stream, e.g., A-A. Default = false.
-     */
-
-    // Set variable to indicate whether the shuffle is completed
-    const shuffledList = [];
-
-    let previousChunk = null;
-
-    // These only get assigned values after the first loop
-    // This makes sure to avoid not assigned errors
-    let firstPatternFromCurrentChunk = [1, 1, 1];
-    let lastPatternFromPreviousChunk = [2, 2, 2];
-
-    for (let chunkIndex = 0; chunkIndex < this.numberOfRepetitions; chunkIndex += shuffleInterval) {
-      // Get the chunk, make it flat so the pattern are combined into a 2D array
-      // (Note to self: If the last chunk is smaller, slice only takes the remainder of the array)
-      let chunk = structuredClone(this.chunkedPatternList.slice(chunkIndex, chunkIndex + shuffleInterval).flat());
-
-      let shuffleComplete = false;
-
-      while (shuffleComplete === false) {
-        fischerYatesShuffle(chunk);
-
-        const patternRepetitions = hasPatternRepetitions(chunk);
-        const secondOrderPatternRepetitions = hasSecondOrderPatternRepetitions(chunk);
-        const itemRepetitions = hasItemRepetitions(chunk);
-
-        if (chunkIndex > 0 && chunkIndex <= chunk.length - shuffleInterval) {
-          firstPatternFromCurrentChunk = getFirstPatternFromPatternList(chunk);
-          lastPatternFromPreviousChunk = getLastPatternFromPatternList(previousChunk);
-        }
-
-        // Check all conditions, if fulfilled shuffle will be complete
-
-        if (
-          firstPatternFromCurrentChunk === lastPatternFromPreviousChunk ||
-          (allowPatternRepetitions === false && patternRepetitions === true) ||
-          (allowSecondOrderPatternRepetitions === false && secondOrderPatternRepetitions) === true ||
-          (allowItemRepetitions === false && itemRepetitions === true)
-        ) {
-          // pass and redo the loop
-        } else {
-          shuffledList.push(chunk);
-          previousChunk = structuredClone(chunk);
-          shuffleComplete = true;
-        }
-      }
-    }
-
-    this.chunkedPatternList = shuffledList;
-    this.patternList = this.chunkedPatternList.flat();
-    this.itemList = this.patternListToItemList(this.patternList, this.patternSize);
-  }
-}
-function hasPatternRepetitions(array) {
-  for (let pattern = 0; pattern < array.length - 1; pattern++) {
-    const currentPattern = array[pattern].index;
-    const nextPattern = array[pattern + 1].index;
-
-    // If two patterns are repeating/ they are similar, return true
-    if (currentPattern === nextPattern) {
-      return true;
-    }
-  }
-
-  return false; // No pattern repetitions
-}
-function hasSecondOrderPatternRepetitions(array) {
-  // 2D array
-  for (let pattern = 0; pattern < array.length - 1; pattern++) {
-    // Prevent out of index error
-    if (pattern < array.length - 3) {
-      // Get the next two patterns
-      const first_sequence = parseInt(array[pattern].index.toString() + array[pattern + 1].index.toString());
-      // 3rd and 4th pattern
-      const second_sequence = parseInt(array[pattern + 2].index.toString() + array[pattern + 3].index.toString());
-
-      // // If two patterns are repeating/ they are similar, return true
-      if (first_sequence === second_sequence) {
-        return true;
-      }
-    }
-  }
-  return false; // No second order repetitions
-}
-
-function hasItemRepetitions(array) {
-  // 1D array
-  const flatArray = flattenPatternList(array);
-  for (let stimulus = 0; stimulus < flatArray.length; stimulus++) {
-    const currentItem = flatArray[stimulus].itemIndex;
-    const nextItem = flatArray[stimulus + 1].itemIndex;
-    if (currentItem === nextItem) {
-      return true;
-    }
-  }
-}
-
-function flattenPatternList(patternList, patternSize) {
-  const flatArray = patternList.reduce((result, pattern) => {
-    for (let i = 1; i <= patternSize; i++) {
-      const itemIndex = (pattern.index - 1) * patternSize + i;
-      result.push({
-        name: pattern[`stimulus${i}`],
-        itemIndex: itemIndex,
-        patternIndex: pattern.index,
-      });
-    }
-    return result;
-  }, []);
-
-  return flatArray;
-}
-
-function getFirstPatternFromPatternList(patternList) {
-  return patternList[0].index;
-}
-
-function getLastPatternFromPatternList(patternList) {
-  return patternList[patternList.length - 1].index;
 }

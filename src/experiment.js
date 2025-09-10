@@ -1,7 +1,7 @@
 /**
- * @title ConsolidationExperiment2
- * @description A follow-up study to see if there is a test-effect and whether the target detection during exposure affects how people learn.
- * @version 0.1.0
+ * @title Online studie
+ * @description Online studie
+ * @version 0.9
  *
  * @assets assets/
  */
@@ -17,27 +17,28 @@ import {
   goodbyeTrial,
   setFullscreen,
   streamInstructions,
-  sicrInstructions,
   afcInstructions,
   hpInstructions,
   welcomeInstructions,
-  sicrPracticeInstructions,
-  sicrTaskStartInstructions,
   soundCheckInstructions,
 } from "./modules/instruction.js";
-import { demographics } from "./modules/survey.js";
+import { demographics, headphoneQuestion } from "./modules/survey.js";
 import { Stream } from "./modules/stream.js";
 import { AfcTask } from "./modules/afc.js";
-import { SicrTask } from "./modules/sicr.js";
-import { selectTriplets } from "./modules/retest.js";
 
 import { getBrowserInfo } from "./modules/helper-functions.js";
-import { generateCombinations } from "./modules/helper-functions.js";
-import { catchTrialResponseList, numberOfCatchTrials } from "./modules/catch-trial-manager.js";
-import { recognitionTrialList, completionTrialList } from "./modules/afc-trials.js";
-import { ChunkTrialList, foilTrialList } from "./modules/sicr-trials.js";
+
+import {
+  completionTrialListSet1,
+  completionTrialListSet2,
+  recognitionTrialListSet1,
+  recognitionTrialListSet2,
+} from "./modules/afc-trials.js";
+
 import { createHugginsPitchTask } from "./modules/huggins-pitch";
-import { createSoundCheck } from "./modules/sound-check.js";
+import { createSoundCheck, createCatchSoundCheck } from "./modules/sound-check.js";
+import { finishCondition, getCondition } from "./modules/counter-balance.js";
+import { hugginsStimuli, patterns } from "./modules/experiment-info.js";
 
 /**
  * This function will be executed by jsPsych Builder and is expected to run the jsPsych experiment
@@ -47,21 +48,45 @@ import { createSoundCheck } from "./modules/sound-check.js";
 export async function run({ assetPaths, input = {}, environment, title, version }) {
   const jsPsych = initJsPsych({
     on_finish: function () {
-      jsPsych.data.displayData("csv");
+      finishCondition(condition);
+      // Retrieve all data
+      let allData = jsPsych.data.get();
+
+      // Apply any filtering or processing here
+      // For example, filtering to include only certain trial types
+      let filteredData = allData.filter({ results: true });
+
+      // Convert the filtered/processed data to JSON
+      let jsonData = filteredData.json();
+
+      // Send the processed data to JATOS
+      jatos.endStudy(jsonData);
     },
   });
 
   // Get user info, add to data file
-  // TODO condition retest
   const browserInfo = getBrowserInfo();
-  const sonaID = parseInt(jsPsych.data.getURLVariable("SONA_ID"));
-  jsPsych.data.addProperties({ sonaId: sonaID, browser: browserInfo.browser, browserVersion: browserInfo.version });
+  const sonaId = jatos.urlQueryParameters.SONA_ID;
+
+  // Get the condition from batch file (jatos)
+  const condition = getCondition();
+
+  // which set is used today for testing
+  const setNumber = condition === "a" ? 1 : 2;
+
+  jsPsych.data.addProperties({
+    sonaId: sonaId,
+    browser: browserInfo.browser,
+    browserVersion: browserInfo.version,
+    condition: condition,
+    setNumber: setNumber,
+  });
 
   // Stimulus data
   const assetPath = "assets/";
   const fileFormat = ".wav";
 
-  // Create the experiment timeline - the "macro timeline"
+  // Create the experiment timeline - the "macro timeline" which contains all individual parts
   const timeline = [];
 
   // Preload assets
@@ -73,84 +98,40 @@ export async function run({ assetPaths, input = {}, environment, title, version 
   });
 
   /*
-   ****************** HUGGINS PITCH HEADPHONE TEST *******************
+   ****************** SOUND CHECKS *******************
    */
-  let hugginsTimeline = createHugginsPitchTask(jsPsych, assetPath, fileFormat, [
-    "HP_1_1",
-    "HP_1_2",
-    "HP_1_3",
-    "HP_2_1",
-    "HP_2_2",
-    "HP_2_3",
-  ]);
+  const hugginsTimeline = createHugginsPitchTask(jsPsych, assetPath, fileFormat, hugginsStimuli);
+  const soundCheck = createSoundCheck(jsPsych, assetPath, fileFormat, "Ke");
+  const catchSoundCheck = createCatchSoundCheck(jsPsych, assetPath, fileFormat, "Xu");
+  /*
+   ****************** EXPOSURE *******************
+   */
 
-  const soundCheck = createSoundCheck(jsPsych, assetPath, fileFormat, "woef");
-
-  //EXPOSURE
-  // Patterns that are used for exposure
-
-  const patterns = [
-    ["Ho", "Di", "Ve"],
-    ["Di", "Ho", "Mu"],
-    ["Mu", "Ve", "Ho"],
-    ["Ve", "Mu", "Di"],
-    ["Ba", "Lu", "Gi"],
-    ["Ze", "Ta", "Pu"],
-    ["So", "Ne", "Ja"],
-    ["Wi", "Ke", "Fo"],
-  ];
-
-  // Create the stream with patternlist and how many times they must be repeated
-  const stream = new Stream(jsPsych, patterns, 75);
-  stream.shuffle(1); // the interval in which shuffles should occur (i.e., should each pattern occur before the same one can occur again)
-  stream.insertCatchTrials();
-  stream.createTimeline(assetPath, fileFormat);
-
-  // AFC task
-  const timeBetweenAlternatives = 1000; // within a trial (milliseconds)
-  const recognitionTrialCorrectList = 1; // The correct position is always 1
-  const completionTrialCorrectList = 1; // The correct position is always 1
-
-  const afcTask = new AfcTask(
-    jsPsych,
-    assetPath,
-    fileFormat,
-    recognitionTrialList,
-    recognitionTrialCorrectList,
-    completionTrialList,
-    completionTrialCorrectList,
-    true,
-    true,
-    timeBetweenAlternatives
-  );
-
-  //SICR task
-  const sicrTask = new SicrTask(jsPsych, assetPath, fileFormat, ChunkTrialList, foilTrialList, true);
+  const streamInfo = {
+    assetPath: assetPath,
+    fileFormat: fileFormat,
+    patterns: patterns,
+    numberOfRepetitions: 72,
+    chunkSize: 4,
+    modality: "auditory",
+  };
+  // Create the stream with streamInfo (include instance of jspsych so the stream class can use jspsych functions)
+  const stream = new Stream(jsPsych, streamInfo);
 
   // push all the tasks and trials to the experiment timeline
   timeline.push(
-    // welcomeInstructions,
-    demographics
-    // soundCheckInstructions,
-    // soundCheck,
-    // setFullscreen,
-    // hpInstructions,
-    // hugginsTimeline,
-    // streamInstructions,
-    // stream.timeline,
-    // sicrInstructions,
-    // sicrPracticeInstructions,
-    // // sicrPractice task- TODO
-    // sicrTaskStartInstructions,
-    // sicrTask.timeline,
-    // afcInstructions,
-    // afcTask.timeline,
-    // goodbyeTrial
+    welcomeInstructions,
+    demographics,
+    soundCheckInstructions,
+    soundCheck,
+    setFullscreen,
+    hpInstructions,
+    hugginsTimeline,
+    streamInstructions,
+    catchSoundCheck,
+    stream.timeline,
+    headphoneQuestion,
+    goodbyeTrial
   );
-
   await jsPsych.run(timeline);
-
-  // Return the jsPsych instance so jsPsych  Builder can access the experiment results (remove this
-  // if you handle results yourself, be it here or in `on_finish()`)
-  return jsPsych;
 }

@@ -20,7 +20,7 @@ export function createHugginsPitchTask(jsPsych, assetPath, fileFormat, trialList
       // ready announcement
       type: HtmlKeyboardResponsePlugin,
       choices: " ",
-      stimulus: "",
+      stimulus: " ",
       prompt: "Duw op de spatiebalk als je klaar bent.",
     });
     timeline.push({
@@ -32,7 +32,8 @@ export function createHugginsPitchTask(jsPsych, assetPath, fileFormat, trialList
     // Add a response trial
     timeline.push({
       type: HtmlKeyboardResponsePlugin,
-      prompt: "In welk ruissignaal hoorde je een subtiele toon?",
+      stimulus: " ",
+      prompt: "In welk ruissignaal hoorde je een subtiele toon? Duw op 1, 2, of 3 om te antwoorden.",
       choices: ["&", "é", '"', "1", "2", "3"],
       data: {
         correctResponse: correctResponse,
@@ -53,7 +54,7 @@ export function createHugginsPitchTask(jsPsych, assetPath, fileFormat, trialList
 
   return {
     type: AudioKeyboardResponsePlugin,
-    prompt: "Welk ruissignaal bevatte een subtiele toon, duw op 1, 2 of 3.",
+    prompt: "Welk ruissignaal bevatte een subtiele toon? Duw op 1, 2 of 3 om te antwoorden.",
     choices: "NO_KEYS",
     response_allowed_while_playing: false,
     timeline: timeline,

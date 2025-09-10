@@ -1,5 +1,35 @@
 import SurveyPlugin from "@jspsych/plugin-survey";
-
+import "@jspsych/plugin-survey/css/survey.css";
+export const headphoneQuestion = {
+  type: SurveyPlugin,
+  data: {
+    task: "headphoneQuestion",
+  },
+  button_label_finish: "Doorgaan",
+  pages: [
+    [
+      {
+        type: "html",
+        prompt:
+          "<div style='text-align: left; width:600px;'>" +
+          "Voor dit deel van de studie afgelopen is, hebben we nog één vraag. " +
+          "Gelieve eerlijk te antwoorden, dit heeft geen invloed op jouw credits." +
+          "</div>",
+      },
+      {
+        type: "multi-choice",
+        prompt: "Welk audioapparaat heb je gebruikt gedurende de studie?",
+        name: "headphoneQuestion",
+        options: ["Hoofdtelefoon", "Oortjes", "Luidsprekers"],
+        required: true,
+      },
+    ],
+  ],
+  on_finish: function (data) {
+    data.headphoneQuestion = data.response.headphoneQuestion;
+    data.results = true;
+  },
+};
 export const demographics = {
   type: SurveyPlugin,
   data: {
@@ -10,7 +40,7 @@ export const demographics = {
     [
       {
         type: "html",
-        prompt: "Gelieve te antwoorden op volgende vragen:",
+        prompt: "<b>Gelieve te antwoorden op volgende vragen (scroll naar beneden om verder te gaan):<b>",
       },
       {
         type: "multi-choice",
@@ -33,11 +63,20 @@ export const demographics = {
         options: ["Ja", "Neen", "Ik zeg het liever niet."],
         required: true,
       },
+      {
+        type: "multi-choice",
+        prompt: "Wat is jouw voorkeurshand?",
+        name: "handedness",
+        options: ["Rechts", "Links", "Ambidexter"],
+        required: true,
+      },
     ],
   ],
   on_finish: function (data) {
     data.gender = data.response.gender;
     data.age = data.response.age;
     data.neurologicalIssues = data.response.neurologicalIssues;
+    data.handedness = data.response.handedness;
+    data.results = true;
   },
 };

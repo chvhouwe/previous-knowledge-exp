@@ -18,19 +18,18 @@ export class AfcTask {
     shuffleTrials,
     shuffleAlternatives,
     timeBetweenAlternatives,
-    instructions,
-    recognitionInstructions,
-    completionInstructions
+    condition
   ) {
     this.jsPsych = jsPsych;
     this.assetPath = assetPath;
     this.fileFormat = fileFormat;
-    this.recognitionTrialList = recognitionTrialList;
+    this.condition = condition;
+    this.recognitionTrialList = JSON.parse(JSON.stringify(recognitionTrialList));
     this.recognitionTrialCorrectList = this.createCorrectList(
       recognitionTrialCorrectList,
       this.recognitionTrialList.length
     );
-    this.completionTrialList = completionTrialList;
+    this.completionTrialList = JSON.parse(JSON.stringify(completionTrialList));
     this.completionTrialCorrectList = this.createCorrectList(
       completionTrialCorrectList,
       this.completionTrialList.length
@@ -58,17 +57,6 @@ export class AfcTask {
       _recognitionTrialList.push(currentTrial);
     }
 
-    // // Shuffle if necessary and push to trial list
-    // if (this.shuffleTrials) {
-    //   fischerYatesShuffle(_recognitionTrialList);
-    // }
-
-    // // Assign a trial number to each trial after shuffling
-    // _recognitionTrialList.forEach((trial, index) => {
-    //   trial.data = trial.data || {}; // Ensure the data object exists
-    //   trial.data.trialNumber = index + 1; // Assign trial number
-    // });
-
     trialList.push(..._recognitionTrialList); // ... _> spread operator to push the individual items of the array
     //this.trialCounter += _recognitionTrialList.length;
 
@@ -83,20 +71,14 @@ export class AfcTask {
       _completionTrialList.push(currentTrial);
     }
 
-    // // Shuffle if necessary and push to trial list
-    // if (this.shuffleTrials) {
-    //   fischerYatesShuffle(_completionTrialList);
-    // }
-
-    // // Assign a trial number to each trial after shuffling
-    // _completionTrialList.forEach((trial, index) => {
-    //   trial.data = trial.data || {}; // Ensure the data object exists
-    //   trial.data.trialNumber = index + this.trialCounter; // Assign trial number
-    // });
-
     trialList.push(..._completionTrialList); // ... _> spread operator to push the individual items of the array
 
-    //this.trialCounter += _completionTrialList.length;
+    // Before shuffling, add the indices to the trials (for later when checking for retested items)
+    const startIndex = this.condition === "a" ? 1 : trialList.length + 1;
+    trialList.forEach((trial, index) => {
+      trial.data = trial.data || {};
+      trial.data.trialIndex = startIndex + index;
+    });
 
     // Shuffle if necessary and push to trial list
     if (this.shuffleTrials) {
@@ -167,7 +149,7 @@ export class AfcTask {
       type: HtmlKeyboardResponsePlugin,
       choices: " ",
       stimulus: "",
-      prompt: "Duw op de spatiebalk als je klaar bent.",
+      prompt: `<p><b>Patroon Kiezen</b><p> <p>Je krijgt ${numberOfAlternatives} patronen van lettergrepen te horen. Achteraf kan jij aangeven welke het meest bekend klinkt voor jou. duw op de spatiebalk als je klaar bent om te luisteren.<p>`,
     };
 
     // Create the response form (jspsych object)
@@ -176,7 +158,7 @@ export class AfcTask {
       stimulus: responseMessage,
       choices: responseChoices,
       data: {
-        task: "AFC",
+        task: "afc",
         taskType: "pattern recognition",
         numberOfAlternatives: numberOfAlternatives,
         trialCompleted: false,
@@ -194,6 +176,7 @@ export class AfcTask {
             data.correct = false;
           }
 
+          data.correctResponse = correctResponse;
           data.responsePosition = afcTaskInstance.getResponsePosition(data.response);
           data.correctPosition = correctPosition;
           data.chosenAlternative = alternatives[data.responsePosition - 1].join("");
@@ -228,7 +211,7 @@ export class AfcTask {
         }
       },
       onfinish: function () {
-        afcTaskInstance.jsPsych.data.getLastTrialData().addToAll({ trialRT: totalRT });
+        afcTaskInstance.jsPsych.data.getLastTrialData().addToLast({ trialRT: totalRT });
       },
     };
 
@@ -283,13 +266,14 @@ export class AfcTask {
       type: HtmlKeyboardResponsePlugin,
       choices: " ",
       stimulus: "",
-      prompt: "Duw op de spatiebalk als je klaar bent.",
+      prompt: `<p><b>Patroon aanvullen</b></p><p>Één van de ${patternLength} lettergrepen ontbreekt in dit patroon. De ontbrekende lettergreep is vervangen door een 'ping' geluid. Na het luisteren kan jij aangeven welke lettergreep volgens jou op deze plaats hoort. Duw op de spatiebalk als je klaar bent om te luisteren.</p>`,
     };
     const alternativesAnnouncement = {
       type: HtmlKeyboardResponsePlugin,
       choices: " ",
       stimulus: "",
-      prompt: "Hierna volgen de antwoordmogelijkheden, duw op de spatiebalk om verder te gaan.",
+      prompt:
+        "Hierna volgen 3 antwoordmogelijkheden. Achteraf kan je kiezen welke lettergreep volgens jou op de plaats van de 'ping' hoort. duw op de spatiebalk om verder te gaan.",
     };
 
     const alternativesStimuli = {
@@ -324,7 +308,7 @@ export class AfcTask {
           } else {
             data.correct = false;
           }
-
+          data.correctResponse = correctResponse;
           data.responsePosition = afcTaskInstance.getResponsePosition(data.response);
           data.correctPosition = correctPosition;
           data.chosenAlternative = alternatives[data.responsePosition - 1];
@@ -355,7 +339,7 @@ export class AfcTask {
       loop_function: function (data) {
         let rt = afcTaskInstance.jsPsych.data.getLastTrialData().select("rt").values[0];
         totalRT += rt;
-        afcTaskInstance.jsPsych.data.getLastTrialData().addToAll({ trialRT: totalRT });
+        afcTaskInstance.jsPsych.data.getLastTrialData().addToLast({ trialRT: totalRT });
 
         // get the repeat value from the last trial to see whether the entire trial has to repeat
         let repeat = afcTaskInstance.jsPsych.data.getLastTrialData().select("repeat").values[0];
@@ -375,9 +359,9 @@ export class AfcTask {
   getResponseMessage(numberOfAlternatives, trialType) {
     if (trialType === "patternRecognition") {
       const alternativesMapping = {
-        2: "Welke combinatie klinkt het meest bekend? <br>Duw op 1 of 2 om desbetreffend antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
-        3: "Welke combinatie klinkt het meest bekend? <br>Duw op 1, 2 of 3 om desbetreffend antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
-        4: "Welke combinatie klinkt het meest bekend? <br>Duw op 1, 2, 3 of 4 om desbetreffende antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
+        2: "Welk patroon klinkt het meest bekend? <br>Duw op 1 of 2 om jouw antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
+        3: "Welk patroon klinkt het meest bekend? <br>Duw op 1, 2 of 3 om jouw antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
+        4: "Welk patroon klinkt het meest bekend? <br>Duw op 1, 2, 3 of 4 om jouw antwoord te kiezen. Duw op 'r' om te herbeluisteren.",
       };
 
       if (numberOfAlternatives in alternativesMapping) {
@@ -387,9 +371,9 @@ export class AfcTask {
       }
     } else if (trialType === "patternCompletion") {
       const alternativesMapping = {
-        2: "Duw op 1 of 2 om het geluid te kiezen dat best past in het patroon. Duw op 'r' om te herbeluisteren.",
-        3: "Duw op 1, 2 of 3 om het geluid te kiezen dat best past in het patroon. Duw op 'r' om te herbeluisteren.",
-        4: "Duw op 1, 2, 3 of 4 om het geluid te kiezen dat best past in het patroon. Duw op 'r' om te herbeluisteren.",
+        2: "Duw op 1 of 2 om de lettergreep te kiezen die best past in het patroon (op de plaats van het 'ping' geluid). Duw op 'r' om te herbeluisteren.",
+        3: "Duw op 1, 2 of 3 om de lettergreep te kiezen die best past in het patroon (op de plaats van het 'ping' geluid). Duw op 'r' om te herbeluisteren.",
+        4: "Duw op 1, 2, 3 of 4 om de lettergreep te kiezen die best past in het patroon (op de plaats van het 'ping' geluid). Duw op 'r' om te herbeluisteren.",
       };
       if (numberOfAlternatives in alternativesMapping) {
         return alternativesMapping[numberOfAlternatives];

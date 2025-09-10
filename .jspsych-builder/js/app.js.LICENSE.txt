@@ -1,0 +1,2415 @@
+/*!
+	 * Signature Pad v2.3.2
+	 * https://github.com/szimek/signature_pad
+	 *
+	 * Copyright 2017 Szymon Nowak
+	 * Released under the MIT license
+	 *
+	 * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
+	 * http://corner.squareup.com/2012/07/smoother-signatures.html
+	 *
+	 * Implementation of interpolation using cubic Bézier curves is taken from:
+	 * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
+	 *
+	 * Algorithm for approximated length of a Bézier curve is taken from:
+	 * http://www.lemoda.net/maths/bezier-length/index.html
+	 *
+	 */
+
+/*!
+ * surveyjs - Survey JavaScript library v1.9.30
+ * Copyright (c) 2015-2022 Devsoft Baltic OÜ  - http://surveyjs.io/
+ * License: MIT (http://www.opensource.org/licenses/mit-license.php)
+ */
+
+/*! ../../base */
+
+/*! ../../calculatedValue */
+
+/*! ../../choicesRestful */
+
+/*! ../../conditionProcessValue */
+
+/*! ../../conditions */
+
+/*! ../../conditionsParser */
+
+/*! ../../defaultCss/cssstandard */
+
+/*! ../../defaultTitle */
+
+/*! ../../dragdrop/choices */
+
+/*! ../../dragdrop/survey-elements */
+
+/*! ../../dxSurveyService */
+
+/*! ../../error */
+
+/*! ../../expressionItems */
+
+/*! ../../expressions/expressions */
+
+/*! ../../flowpanel */
+
+/*! ../../functionsfactory */
+
+/*! ../../helpers */
+
+/*! ../../itemvalue */
+
+/*! ../../jsonobject */
+
+/*! ../../kobase */
+
+/*! ../../list */
+
+/*! ../../localizablestring */
+
+/*! ../../localization/arabic */
+
+/*! ../../localization/basque */
+
+/*! ../../localization/bulgarian */
+
+/*! ../../localization/catalan */
+
+/*! ../../localization/croatian */
+
+/*! ../../localization/czech */
+
+/*! ../../localization/danish */
+
+/*! ../../localization/dutch */
+
+/*! ../../localization/english */
+
+/*! ../../localization/estonian */
+
+/*! ../../localization/finnish */
+
+/*! ../../localization/french */
+
+/*! ../../localization/georgian */
+
+/*! ../../localization/german */
+
+/*! ../../localization/greek */
+
+/*! ../../localization/hebrew */
+
+/*! ../../localization/hindi */
+
+/*! ../../localization/hungarian */
+
+/*! ../../localization/icelandic */
+
+/*! ../../localization/indonesian */
+
+/*! ../../localization/italian */
+
+/*! ../../localization/japanese */
+
+/*! ../../localization/kazakh */
+
+/*! ../../localization/korean */
+
+/*! ../../localization/latvian */
+
+/*! ../../localization/lithuanian */
+
+/*! ../../localization/macedonian */
+
+/*! ../../localization/malay */
+
+/*! ../../localization/nl-BE */
+
+/*! ../../localization/norwegian */
+
+/*! ../../localization/persian */
+
+/*! ../../localization/polish */
+
+/*! ../../localization/portuguese */
+
+/*! ../../localization/portuguese-br */
+
+/*! ../../localization/romanian */
+
+/*! ../../localization/russian */
+
+/*! ../../localization/serbian */
+
+/*! ../../localization/simplified-chinese */
+
+/*! ../../localization/slovak */
+
+/*! ../../localization/spanish */
+
+/*! ../../localization/swahili */
+
+/*! ../../localization/swedish */
+
+/*! ../../localization/tajik */
+
+/*! ../../localization/thai */
+
+/*! ../../localization/traditional-chinese */
+
+/*! ../../localization/turkish */
+
+/*! ../../localization/ukrainian */
+
+/*! ../../localization/vietnamese */
+
+/*! ../../localization/welsh */
+
+/*! ../../main.scss */
+
+/*! ../../page */
+
+/*! ../../panel */
+
+/*! ../../popup */
+
+/*! ../../question */
+
+/*! ../../questionCustomWidgets */
+
+/*! ../../question_baseselect */
+
+/*! ../../question_boolean */
+
+/*! ../../question_buttongroup */
+
+/*! ../../question_checkbox */
+
+/*! ../../question_comment */
+
+/*! ../../question_custom */
+
+/*! ../../question_dropdown */
+
+/*! ../../question_empty */
+
+/*! ../../question_expression */
+
+/*! ../../question_file */
+
+/*! ../../question_html */
+
+/*! ../../question_image */
+
+/*! ../../question_imagepicker */
+
+/*! ../../question_matrix */
+
+/*! ../../question_matrixdropdown */
+
+/*! ../../question_matrixdropdownbase */
+
+/*! ../../question_matrixdropdowncolumn */
+
+/*! ../../question_matrixdropdownrendered */
+
+/*! ../../question_matrixdynamic */
+
+/*! ../../question_multipletext */
+
+/*! ../../question_paneldynamic */
+
+/*! ../../question_radiogroup */
+
+/*! ../../question_ranking */
+
+/*! ../../question_rating */
+
+/*! ../../question_signaturepad */
+
+/*! ../../question_text */
+
+/*! ../../questionfactory */
+
+/*! ../../questionnonvalue */
+
+/*! ../../settings */
+
+/*! ../../stylesmanager */
+
+/*! ../../survey */
+
+/*! ../../survey-element */
+
+/*! ../../survey-error */
+
+/*! ../../surveyProgress */
+
+/*! ../../surveyProgressButtons */
+
+/*! ../../surveyStrings */
+
+/*! ../../surveyTimerModel */
+
+/*! ../../surveyWindow */
+
+/*! ../../surveytimer */
+
+/*! ../../template-renderer */
+
+/*! ../../textPreProcessor */
+
+/*! ../../trigger */
+
+/*! ../../utils/cssClassBuilder */
+
+/*! ../../utils/devices */
+
+/*! ../../utils/utils */
+
+/*! ../../validator */
+
+/*! ../action-bar/action-bar */
+
+/*! ../actions/action */
+
+/*! ../actions/adaptive-container */
+
+/*! ../actions/container */
+
+/*! ../base */
+
+/*! ../conditionProcessValue */
+
+/*! ../defaultCss/cssbootstrap */
+
+/*! ../defaultCss/cssbootstrapmaterial */
+
+/*! ../defaultCss/cssmodern */
+
+/*! ../defaultCss/cssstandard */
+
+/*! ../defaultCss/defaultV2Css */
+
+/*! ../functionsfactory */
+
+/*! ../helpers */
+
+/*! ../jsonobject */
+
+/*! ../knockout/components/action-bar/action-bar */
+
+/*! ../knockout/components/boolean-checkbox/boolean-checkbox */
+
+/*! ../knockout/components/boolean-radio/boolean-radio */
+
+/*! ../knockout/components/button-group/button-group-item */
+
+/*! ../knockout/components/dropdown-select/dropdown-select */
+
+/*! ../knockout/components/dropdown/dropdown */
+
+/*! ../knockout/components/list/list */
+
+/*! ../knockout/components/logo-image/logo-image */
+
+/*! ../knockout/components/matrix-actions/detail-button/detail-button */
+
+/*! ../knockout/components/matrix-actions/drag-drop-icon/drag-drop-icon */
+
+/*! ../knockout/components/matrix-actions/remove-button/remove-button */
+
+/*! ../knockout/components/panel/panel */
+
+/*! ../knockout/components/paneldynamic-actions/paneldynamic-actions */
+
+/*! ../knockout/components/popup/popup */
+
+/*! ../knockout/components/progress/buttons */
+
+/*! ../knockout/components/progress/progress */
+
+/*! ../knockout/components/rating-dropdown/rating-dropdown */
+
+/*! ../knockout/components/skeleton/skeleton */
+
+/*! ../knockout/components/string-editor/string-editor */
+
+/*! ../knockout/components/string-viewer/string-viewer */
+
+/*! ../knockout/components/survey-actions/survey-nav-button */
+
+/*! ../knockout/components/svg-icon/svg-icon */
+
+/*! ../knockout/components/template-renderer/template-renderer */
+
+/*! ../knockout/components/title/title-actions */
+
+/*! ../knockout/components/title/title-content */
+
+/*! ../knockout/components/title/title-element */
+
+/*! ../knockout/components/tooltip-error/tooltip-error */
+
+/*! ../knockout/koSurveyWindow */
+
+/*! ../knockout/kobase */
+
+/*! ../knockout/koflowpanel */
+
+/*! ../knockout/kopage */
+
+/*! ../knockout/koquestion */
+
+/*! ../knockout/koquestion_baseselect */
+
+/*! ../knockout/koquestion_boolean */
+
+/*! ../knockout/koquestion_buttongroup */
+
+/*! ../knockout/koquestion_checkbox */
+
+/*! ../knockout/koquestion_comment */
+
+/*! ../knockout/koquestion_custom */
+
+/*! ../knockout/koquestion_dropdown */
+
+/*! ../knockout/koquestion_empty */
+
+/*! ../knockout/koquestion_expression */
+
+/*! ../knockout/koquestion_file */
+
+/*! ../knockout/koquestion_html */
+
+/*! ../knockout/koquestion_image */
+
+/*! ../knockout/koquestion_imagepicker */
+
+/*! ../knockout/koquestion_matrix */
+
+/*! ../knockout/koquestion_matrixdropdown */
+
+/*! ../knockout/koquestion_matrixdynamic */
+
+/*! ../knockout/koquestion_multipletext */
+
+/*! ../knockout/koquestion_paneldynamic */
+
+/*! ../knockout/koquestion_radiogroup */
+
+/*! ../knockout/koquestion_ranking */
+
+/*! ../knockout/koquestion_rating */
+
+/*! ../knockout/koquestion_signaturepad */
+
+/*! ../knockout/koquestion_text */
+
+/*! ../knockout/kosurvey */
+
+/*! ../knockout/templateText */
+
+/*! ../list */
+
+/*! ../popup */
+
+/*! ../rendererFactory */
+
+/*! ../survey-element */
+
+/*! ../svgbundle */
+
+/*! ../utils/cssClassBuilder */
+
+/*! ../utils/devices */
+
+/*! ../utils/dragOrClickHelper */
+
+/*! ../utils/responsivity-manager */
+
+/*! ../utils/tooltip */
+
+/*! ../utils/utils */
+
+/*! ./../process/browser.js */
+
+/*! ./../settings */
+
+/*! ./../webpack/buildin/global.js */
+
+/*! ./action */
+
+/*! ./action-bar-item */
+
+/*! ./action-bar-item-dropdown */
+
+/*! ./action-bar-item-dropdown.html */
+
+/*! ./action-bar-item.html */
+
+/*! ./action-bar-separator */
+
+/*! ./action-bar-separator.html */
+
+/*! ./action-bar.html */
+
+/*! ./action.html */
+
+/*! ./actions/action */
+
+/*! ./actions/adaptive-container */
+
+/*! ./actions/container */
+
+/*! ./base */
+
+/*! ./boolean-checkbox.html */
+
+/*! ./boolean-radio-item */
+
+/*! ./boolean-radio-item.html */
+
+/*! ./boolean-radio.html */
+
+/*! ./button-group-item.html */
+
+/*! ./choices */
+
+/*! ./choicesRestful */
+
+/*! ./chunks/localization */
+
+/*! ./chunks/model */
+
+/*! ./comment.html */
+
+/*! ./conditionProcessValue */
+
+/*! ./conditions */
+
+/*! ./conditionsParser */
+
+/*! ./container */
+
+/*! ./core */
+
+/*! ./cssstandard */
+
+/*! ./defaultCss/cssstandard */
+
+/*! ./detail-button.html */
+
+/*! ./drag-drop-icon.html */
+
+/*! ./dragdrop/matrix-rows */
+
+/*! ./dragdrop/ranking-choices */
+
+/*! ./dropdown-select.html */
+
+/*! ./dropdown.html */
+
+/*! ./dutch */
+
+/*! ./dxSurveyService */
+
+/*! ./error */
+
+/*! ./expressions */
+
+/*! ./expressions/expressionParser */
+
+/*! ./expressions/expressions */
+
+/*! ./flowpanel.html */
+
+/*! ./functionsfactory */
+
+/*! ./header.html */
+
+/*! ./helpers */
+
+/*! ./index.html */
+
+/*! ./itemvalue */
+
+/*! ./jsonobject */
+
+/*! ./knockout-ui-model */
+
+/*! ./kobase */
+
+/*! ./koquestion */
+
+/*! ./koquestion_baseselect */
+
+/*! ./koquestion_matrixdropdown */
+
+/*! ./koquestion_text */
+
+/*! ./list */
+
+/*! ./list-item */
+
+/*! ./list-item.html */
+
+/*! ./list.html */
+
+/*! ./localizablestring */
+
+/*! ./localization/english */
+
+/*! ./logo-image.html */
+
+/*! ./martixBase */
+
+/*! ./page.html */
+
+/*! ./panel */
+
+/*! ./panel.html */
+
+/*! ./paneldynamic-add-btn.html */
+
+/*! ./paneldynamic-next-btn.html */
+
+/*! ./paneldynamic-prev-btn.html */
+
+/*! ./paneldynamic-progress-text.html */
+
+/*! ./popup */
+
+/*! ./question */
+
+/*! ./question-boolean.html */
+
+/*! ./question-buttongroup.html */
+
+/*! ./question-checkbox.html */
+
+/*! ./question-comment.html */
+
+/*! ./question-composite.html */
+
+/*! ./question-custom.html */
+
+/*! ./question-dropdown.html */
+
+/*! ./question-empty.html */
+
+/*! ./question-errors.html */
+
+/*! ./question-expression.html */
+
+/*! ./question-file.html */
+
+/*! ./question-html.html */
+
+/*! ./question-image.html */
+
+/*! ./question-imagepicker.html */
+
+/*! ./question-matrix.html */
+
+/*! ./question-matrixdynamic.html */
+
+/*! ./question-multipletext.html */
+
+/*! ./question-paneldynamic-navigator.html */
+
+/*! ./question-paneldynamic.html */
+
+/*! ./question-radiogroup.html */
+
+/*! ./question-ranking.html */
+
+/*! ./question-rating.html */
+
+/*! ./question-signaturepad.html */
+
+/*! ./question-text.html */
+
+/*! ./question.html */
+
+/*! ./questionCustomWidgets */
+
+/*! ./question_baseselect */
+
+/*! ./question_checkbox */
+
+/*! ./question_dropdown */
+
+/*! ./question_expression */
+
+/*! ./question_matrixdropdownbase */
+
+/*! ./question_matrixdropdowncolumn */
+
+/*! ./question_matrixdropdownrendered */
+
+/*! ./question_text */
+
+/*! ./question_textbase */
+
+/*! ./questioncontent.html */
+
+/*! ./questionfactory */
+
+/*! ./questionnonvalue */
+
+/*! ./questiontitle.html */
+
+/*! ./rating-dropdown.html */
+
+/*! ./remove-button.html */
+
+/*! ./rendererFactory */
+
+/*! ./row.html */
+
+/*! ./rows.html */
+
+/*! ./settings */
+
+/*! ./skeleton.html */
+
+/*! ./string-editor.html */
+
+/*! ./string-viewer.html */
+
+/*! ./string.html */
+
+/*! ./stylesmanager */
+
+/*! ./survey */
+
+/*! ./survey-element */
+
+/*! ./survey-error */
+
+/*! ./survey-nav-button.html */
+
+/*! ./surveyStrings */
+
+/*! ./surveyTimerModel */
+
+/*! ./surveytimer */
+
+/*! ./svg-icon.html */
+
+/*! ./template-renderer.html */
+
+/*! ./templateText */
+
+/*! ./textPreProcessor */
+
+/*! ./timerpanel.html */
+
+/*! ./title-actions.html */
+
+/*! ./title-content.html */
+
+/*! ./utils */
+
+/*! ./utils/cssClassBuilder */
+
+/*! ./utils/devices */
+
+/*! ./utils/dragOrClickHelper */
+
+/*! ./utils/popup */
+
+/*! ./utils/utils */
+
+/*! ./validator */
+
+/*! exports provided: Action, ActionDropdownViewModel */
+
+/*! exports provided: ActionBarItemDropdownViewModel */
+
+/*! exports provided: ActionBarItemViewModel */
+
+/*! exports provided: ActionBarItemViewModel, ActionBarItemDropdownViewModel, ActionBarSeparatorViewModel, ActionContainerImplementor */
+
+/*! exports provided: ActionBarSeparatorViewModel */
+
+/*! exports provided: AdaptiveActionContainer */
+
+/*! exports provided: AnswerRequiredError, OneAnswerRequiredError, RequreNumericError, ExceedSizeError, WebRequestError, WebRequestEmptyError, OtherEmptyError, UploadingFileError, RequiredInAllRowsError, MinRowCountError, KeyDuplicationError, CustomError */
+
+/*! exports provided: Bindings, Dependencies, ComputedUpdater, Base, ArrayChanges, Event, EventBase */
+
+/*! exports provided: BooleanRadioItemViewModel */
+
+/*! exports provided: BooleanRadioItemViewModel, BooleanRadioViewModel */
+
+/*! exports provided: ButtonGroupItemValue, QuestionButtonGroupModel, ButtonGroupItemModel */
+
+/*! exports provided: ButtonGroupItemViewModel */
+
+/*! exports provided: CalculatedValue */
+
+/*! exports provided: CheckboxViewModel */
+
+/*! exports provided: ChoicesRestful, ChoicesRestfull */
+
+/*! exports provided: ComponentQuestionJSON, ComponentCollection, QuestionCustomModelBase, QuestionCustomModel, QuestionCompositeModel */
+
+/*! exports provided: ConditionsParserError, ConditionsParser */
+
+/*! exports provided: CssClassBuilder */
+
+/*! exports provided: DefaultTitleModel */
+
+/*! exports provided: DragDropChoices */
+
+/*! exports provided: DragDropCore */
+
+/*! exports provided: DragDropInfo, QuestionRowModel, PanelModelBase, PanelModel */
+
+/*! exports provided: DragDropMatrixRows */
+
+/*! exports provided: DragDropRankingChoices */
+
+/*! exports provided: DragDropSurveyElements */
+
+/*! exports provided: DragOrClickHelper */
+
+/*! exports provided: DropdownSelectViewModel */
+
+/*! exports provided: DropdownViewModel */
+
+/*! exports provided: ExpressionExecutor, ExpressionRunnerBase, ConditionRunner, ExpressionRunner */
+
+/*! exports provided: ExpressionItem, HtmlConditionItem, UrlConditionItem */
+
+/*! exports provided: FlowPanel */
+
+/*! exports provided: FlowPanelModel */
+
+/*! exports provided: FunctionFactory, registerFunction */
+
+/*! exports provided: Helpers */
+
+/*! exports provided: ImageItemValue, QuestionImagePickerModel */
+
+/*! exports provided: ImplementorBase */
+
+/*! exports provided: IsMobile, IsTouch */
+
+/*! exports provided: ItemValue */
+
+/*! exports provided: ListItemViewComponent */
+
+/*! exports provided: ListItemViewComponent, ListViewComponent */
+
+/*! exports provided: ListModel */
+
+/*! exports provided: LocalizableString, LocalizableStrings */
+
+/*! exports provided: LogoImageViewModel */
+
+/*! exports provided: MatrixDropdownCell, MatrixDropdownTotalCell, MatrixDropdownRowModelBase, MatrixDropdownTotalRowModel, QuestionMatrixDropdownModelBase */
+
+/*! exports provided: MatrixDropdownRowModel, QuestionMatrixDropdownModel */
+
+/*! exports provided: MatrixDynamicRowModel, QuestionMatrixDynamicModel */
+
+/*! exports provided: MatrixRowModel, MatrixCells, QuestionMatrixModel */
+
+/*! exports provided: MultipleTextItem, QuestionMultipleTextImplementor, QuestionMultipleText */
+
+/*! exports provided: MultipleTextItemModel, QuestionMultipleTextModel */
+
+/*! exports provided: Operand, BinaryOperand, UnaryOperand, ArrayOperand, Const, Variable, FunctionOperand, OperandMaker */
+
+/*! exports provided: PageModel */
+
+/*! exports provided: PanelViewModel */
+
+/*! exports provided: PopupModel, createPopupModalViewModel, PopupBaseViewModel */
+
+/*! exports provided: PopupUtils */
+
+/*! exports provided: PopupViewModel, showModal */
+
+/*! exports provided: ProcessValue */
+
+/*! exports provided: ProgressButtonsViewModel */
+
+/*! exports provided: ProgressViewModel */
+
+/*! exports provided: Question */
+
+/*! exports provided: QuestionBoolean */
+
+/*! exports provided: QuestionBooleanModel */
+
+/*! exports provided: QuestionButtonGroup */
+
+/*! exports provided: QuestionCheckboxImplementor, QuestionCheckbox */
+
+/*! exports provided: QuestionCheckboxModel */
+
+/*! exports provided: QuestionComment */
+
+/*! exports provided: QuestionCommentModel */
+
+/*! exports provided: QuestionCustom, QuestionComposite */
+
+/*! exports provided: QuestionCustomWidget, CustomWidgetCollection */
+
+/*! exports provided: QuestionDropdown */
+
+/*! exports provided: QuestionDropdownModel */
+
+/*! exports provided: QuestionEmpty */
+
+/*! exports provided: QuestionEmptyModel */
+
+/*! exports provided: QuestionExpression */
+
+/*! exports provided: QuestionExpressionModel, getCurrecyCodes */
+
+/*! exports provided: QuestionFactory, ElementFactory */
+
+/*! exports provided: QuestionFile */
+
+/*! exports provided: QuestionFileModel */
+
+/*! exports provided: QuestionHtml */
+
+/*! exports provided: QuestionHtmlModel */
+
+/*! exports provided: QuestionImage */
+
+/*! exports provided: QuestionImageModel */
+
+/*! exports provided: QuestionImagePicker */
+
+/*! exports provided: QuestionImplementor */
+
+/*! exports provided: QuestionMatrix */
+
+/*! exports provided: QuestionMatrixBaseImplementor, QuestionMatrixDropdown */
+
+/*! exports provided: QuestionMatrixBaseModel */
+
+/*! exports provided: QuestionMatrixDropdownRenderedCell, QuestionMatrixDropdownRenderedRow, QuestionMatrixDropdownRenderedTable */
+
+/*! exports provided: QuestionMatrixDynamicImplementor, QuestionMatrixDynamic */
+
+/*! exports provided: QuestionNonValue */
+
+/*! exports provided: QuestionPanelDynamicImplementor, QuestionPanelDynamic */
+
+/*! exports provided: QuestionPanelDynamicItem, QuestionPanelDynamicTemplateSurveyImpl, QuestionPanelDynamicModel */
+
+/*! exports provided: QuestionRadiogroup */
+
+/*! exports provided: QuestionRadiogroupModel */
+
+/*! exports provided: QuestionRanking */
+
+/*! exports provided: QuestionRankingModel */
+
+/*! exports provided: QuestionRatingImplementor, QuestionRating */
+
+/*! exports provided: QuestionRow, PanelImplementorBase, Panel, Page */
+
+/*! exports provided: QuestionSelectBase, QuestionCheckboxBase */
+
+/*! exports provided: QuestionSelectBaseImplementor, QuestionCheckboxBaseImplementor */
+
+/*! exports provided: QuestionSignaturePad */
+
+/*! exports provided: QuestionSignaturePadModel */
+
+/*! exports provided: QuestionText */
+
+/*! exports provided: QuestionTextBase */
+
+/*! exports provided: QuestionTextModel */
+
+/*! exports provided: RatingDropdownViewModel */
+
+/*! exports provided: RenderedRatingItem, QuestionRatingModel */
+
+/*! exports provided: RendererFactory */
+
+/*! exports provided: ResponsivityManager, VerticalResponsivityManager */
+
+/*! exports provided: Skeleton */
+
+/*! exports provided: StringEditorViewModel */
+
+/*! exports provided: StringViewerViewModel */
+
+/*! exports provided: StylesManager */
+
+/*! exports provided: Survey, SurveyWindow, ImplementorBase, QuestionRow, Page, Panel, FlowPanel, QuestionImplementor, QuestionSelectBaseImplementor, QuestionCheckboxBaseImplementor, QuestionCheckbox, QuestionRanking, QuestionComment, QuestionDropdown, QuestionFile, QuestionHtml, QuestionMatrix, QuestionMatrixDropdown, QuestionMatrixDynamicImplementor, QuestionMatrixDynamic, QuestionPanelDynamic, MultipleTextItem, QuestionMultipleText, QuestionRadiogroup, QuestionRating, QuestionRatingImplementor, QuestionText, QuestionBoolean, QuestionEmpty, QuestionExpression, QuestionImagePicker, SurveyWindowImplementor, SurveyTemplateText, QuestionImage, QuestionSignaturePad, QuestionCustom, QuestionButtonGroup, ActionBarItemViewModel, ActionBarItemDropdownViewModel, ActionBarSeparatorViewModel, ActionContainerImplementor, CheckboxViewModel, BooleanRadioItemViewModel, BooleanRadioViewModel, PanelViewModel, PopupViewModel, showModal, ProgressButtonsViewModel, ProgressViewModel, TitleElementViewModel, TitleContentViewModel, TitleActionViewModel, StringEditorViewModel, StringViewerViewModel, LogoImageViewModel, Skeleton, RatingDropdownViewModel, DropdownViewModel, DropdownSelectViewModel, ListItemViewComponent, ListViewComponent, SvgIconViewModel, SurveyQuestionMatrixDynamicRemoveButton, SurveyQuestionMatrixDetailButton, SurveyQuestionMatrixDynamicDragDropIcon, ButtonGroupItemViewModel, TooltipErrorViewModel, SurveyNavigationButton, SurveyQuestionPaneldynamicActioons */
+
+/*! exports provided: SurveyElementCore, DragTypeOverMeEnum, SurveyElement */
+
+/*! exports provided: SurveyError */
+
+/*! exports provided: SurveyImplementor, Survey, registerTemplateEngine */
+
+/*! exports provided: SurveyModel */
+
+/*! exports provided: SurveyNavigationButton */
+
+/*! exports provided: SurveyProgressButtonsModel */
+
+/*! exports provided: SurveyProgressModel */
+
+/*! exports provided: SurveyQuestionMatrixDetailButton */
+
+/*! exports provided: SurveyQuestionMatrixDynamicDragDropIcon */
+
+/*! exports provided: SurveyQuestionMatrixDynamicRemoveButton */
+
+/*! exports provided: SurveyQuestionPaneldynamicActioons */
+
+/*! exports provided: SurveyTimerModel */
+
+/*! exports provided: SurveyWindowImplementor, SurveyWindow */
+
+/*! exports provided: SurveyWindowModel */
+
+/*! exports provided: SvgIconRegistry, SvgRegistry, SvgBundleViewModel */
+
+/*! exports provided: SvgIconViewModel */
+
+/*! exports provided: SyntaxError, parse */
+
+/*! exports provided: TextPreProcessorItem, TextPreProcessorValue, TextPreProcessor, QuestionTextProcessor */
+
+/*! exports provided: TitleActionViewModel */
+
+/*! exports provided: TitleContentViewModel */
+
+/*! exports provided: TitleElementViewModel */
+
+/*! exports provided: TooltipErrorViewModel */
+
+/*! exports provided: TooltipManager */
+
+/*! exports provided: Trigger, SurveyTrigger, SurveyTriggerVisible, SurveyTriggerComplete, SurveyTriggerSetValue, SurveyTriggerSkip, SurveyTriggerRunExpression, SurveyTriggerCopyValue */
+
+/*! exports provided: ValidatorResult, SurveyValidator, ValidatorRunner, NumericValidator, TextValidator, AnswerCountValidator, RegexValidator, EmailValidator, ExpressionValidator */
+
+/*! exports provided: Version, settings, Helpers, AnswerCountValidator, EmailValidator, NumericValidator, RegexValidator, SurveyValidator, TextValidator, ValidatorResult, ExpressionValidator, ValidatorRunner, ItemValue, Base, Event, ArrayChanges, ComputedUpdater, SurveyError, SurveyElementCore, SurveyElement, DragTypeOverMeEnum, CalculatedValue, CustomError, AnswerRequiredError, OneAnswerRequiredError, RequreNumericError, ExceedSizeError, LocalizableString, LocalizableStrings, HtmlConditionItem, UrlConditionItem, ChoicesRestful, ChoicesRestfull, FunctionFactory, registerFunction, ConditionRunner, ExpressionRunner, ExpressionExecutor, Operand, Const, BinaryOperand, Variable, FunctionOperand, ArrayOperand, ConditionsParser, ProcessValue, JsonError, JsonIncorrectTypeError, JsonMetadata, JsonMetadataClass, JsonMissingTypeError, JsonMissingTypeErrorBase, JsonObject, JsonObjectProperty, JsonRequiredPropertyError, JsonUnknownPropertyError, Serializer, property, propertyArray, MatrixDropdownCell, MatrixDropdownRowModelBase, QuestionMatrixDropdownModelBase, MatrixDropdownColumn, matrixDropdownColumnTypes, QuestionMatrixDropdownRenderedCell, QuestionMatrixDropdownRenderedRow, QuestionMatrixDropdownRenderedTable, MatrixDropdownRowModel, QuestionMatrixDropdownModel, MatrixDynamicRowModel, QuestionMatrixDynamicModel, MatrixRowModel, MatrixCells, QuestionMatrixModel, MultipleTextItemModel, QuestionMultipleTextModel, PanelModel, PanelModelBase, QuestionRowModel, FlowPanelModel, PageModel, DefaultTitleModel, Question, QuestionNonValue, QuestionEmptyModel, QuestionCheckboxBase, QuestionSelectBase, QuestionCheckboxModel, QuestionRankingModel, QuestionCommentModel, QuestionDropdownModel, QuestionFactory, ElementFactory, QuestionFileModel, QuestionHtmlModel, QuestionRadiogroupModel, QuestionRatingModel, RenderedRatingItem, QuestionExpressionModel, QuestionTextModel, QuestionBooleanModel, QuestionImagePickerModel, ImageItemValue, QuestionImageModel, QuestionSignaturePadModel, QuestionPanelDynamicModel, QuestionPanelDynamicItem, SurveyTimer, SurveyTimerModel, SurveyProgressModel, SurveyProgressButtonsModel, SurveyModel, Model, SurveyTrigger, SurveyTriggerComplete, SurveyTriggerSetValue, SurveyTriggerVisible, SurveyTriggerCopyValue, SurveyTriggerRunExpression, Trigger, SurveyWindowModel, TextPreProcessor, dxSurveyService, englishStrings, surveyLocalization, surveyStrings, QuestionCustomWidget, CustomWidgetCollection, QuestionCustomModel, QuestionCompositeModel, ComponentQuestionJSON, ComponentCollection, StylesManager, ListModel, PopupModel, PopupBaseViewModel, createPopupModalViewModel, QuestionButtonGroupModel, ButtonGroupItemModel, ButtonGroupItemValue, IsMobile, IsTouch, confirmAction, detectIEOrEdge, doKey2ClickUp, doKey2ClickDown, loadFileFromBase64, increaseHeightByContent, createSvg, CssClassBuilder, surveyCss, DragDropSurveyElements, DragDropChoices */
+
+/*! exports provided: Version, settings, Helpers, AnswerCountValidator, EmailValidator, NumericValidator, RegexValidator, SurveyValidator, TextValidator, ValidatorResult, ExpressionValidator, ValidatorRunner, ItemValue, Base, Event, ArrayChanges, ComputedUpdater, SurveyError, SurveyElementCore, SurveyElement, DragTypeOverMeEnum, CalculatedValue, CustomError, AnswerRequiredError, OneAnswerRequiredError, RequreNumericError, ExceedSizeError, LocalizableString, LocalizableStrings, HtmlConditionItem, UrlConditionItem, ChoicesRestful, ChoicesRestfull, FunctionFactory, registerFunction, ConditionRunner, ExpressionRunner, ExpressionExecutor, Operand, Const, BinaryOperand, Variable, FunctionOperand, ArrayOperand, ConditionsParser, ProcessValue, JsonError, JsonIncorrectTypeError, JsonMetadata, JsonMetadataClass, JsonMissingTypeError, JsonMissingTypeErrorBase, JsonObject, JsonObjectProperty, JsonRequiredPropertyError, JsonUnknownPropertyError, Serializer, property, propertyArray, MatrixDropdownCell, MatrixDropdownRowModelBase, QuestionMatrixDropdownModelBase, MatrixDropdownColumn, matrixDropdownColumnTypes, QuestionMatrixDropdownRenderedCell, QuestionMatrixDropdownRenderedRow, QuestionMatrixDropdownRenderedTable, MatrixDropdownRowModel, QuestionMatrixDropdownModel, MatrixDynamicRowModel, QuestionMatrixDynamicModel, MatrixRowModel, MatrixCells, QuestionMatrixModel, MultipleTextItemModel, QuestionMultipleTextModel, PanelModel, PanelModelBase, QuestionRowModel, FlowPanelModel, PageModel, DefaultTitleModel, Question, QuestionNonValue, QuestionEmptyModel, QuestionCheckboxBase, QuestionSelectBase, QuestionCheckboxModel, QuestionRankingModel, QuestionCommentModel, QuestionDropdownModel, QuestionFactory, ElementFactory, QuestionFileModel, QuestionHtmlModel, QuestionRadiogroupModel, QuestionRatingModel, RenderedRatingItem, QuestionExpressionModel, QuestionTextModel, QuestionBooleanModel, QuestionImagePickerModel, ImageItemValue, QuestionImageModel, QuestionSignaturePadModel, QuestionPanelDynamicModel, QuestionPanelDynamicItem, SurveyTimer, SurveyTimerModel, SurveyProgressModel, SurveyProgressButtonsModel, SurveyModel, Model, SurveyTrigger, SurveyTriggerComplete, SurveyTriggerSetValue, SurveyTriggerVisible, SurveyTriggerCopyValue, SurveyTriggerRunExpression, Trigger, SurveyWindowModel, TextPreProcessor, dxSurveyService, englishStrings, surveyLocalization, surveyStrings, QuestionCustomWidget, CustomWidgetCollection, QuestionCustomModel, QuestionCompositeModel, ComponentQuestionJSON, ComponentCollection, StylesManager, ListModel, PopupModel, PopupBaseViewModel, createPopupModalViewModel, QuestionButtonGroupModel, ButtonGroupItemModel, ButtonGroupItemValue, IsMobile, IsTouch, confirmAction, detectIEOrEdge, doKey2ClickUp, doKey2ClickDown, loadFileFromBase64, increaseHeightByContent, createSvg, CssClassBuilder, surveyCss, DragDropSurveyElements, DragDropChoices, defaultStandardCss, defaultBootstrapCss, defaultBootstrapMaterialCss, defaultV2Css, modernCss, SvgIconRegistry, SvgRegistry, SvgBundleViewModel, RendererFactory, ResponsivityManager, VerticalResponsivityManager, unwrap, Action, ActionDropdownViewModel, AdaptiveActionContainer, defaultActionBarCss, ActionContainer, TooltipManager, DragOrClickHelper */
+
+/*! exports provided: Version, settings, Helpers, AnswerCountValidator, EmailValidator, NumericValidator, RegexValidator, SurveyValidator, TextValidator, ValidatorResult, ExpressionValidator, ValidatorRunner, ItemValue, Base, Event, ArrayChanges, ComputedUpdater, SurveyError, SurveyElementCore, SurveyElement, DragTypeOverMeEnum, CalculatedValue, CustomError, AnswerRequiredError, OneAnswerRequiredError, RequreNumericError, ExceedSizeError, LocalizableString, LocalizableStrings, HtmlConditionItem, UrlConditionItem, ChoicesRestful, ChoicesRestfull, FunctionFactory, registerFunction, ConditionRunner, ExpressionRunner, ExpressionExecutor, Operand, Const, BinaryOperand, Variable, FunctionOperand, ArrayOperand, ConditionsParser, ProcessValue, JsonError, JsonIncorrectTypeError, JsonMetadata, JsonMetadataClass, JsonMissingTypeError, JsonMissingTypeErrorBase, JsonObject, JsonObjectProperty, JsonRequiredPropertyError, JsonUnknownPropertyError, Serializer, property, propertyArray, MatrixDropdownCell, MatrixDropdownRowModelBase, QuestionMatrixDropdownModelBase, MatrixDropdownColumn, matrixDropdownColumnTypes, QuestionMatrixDropdownRenderedCell, QuestionMatrixDropdownRenderedRow, QuestionMatrixDropdownRenderedTable, MatrixDropdownRowModel, QuestionMatrixDropdownModel, MatrixDynamicRowModel, QuestionMatrixDynamicModel, MatrixRowModel, MatrixCells, QuestionMatrixModel, MultipleTextItemModel, QuestionMultipleTextModel, PanelModel, PanelModelBase, QuestionRowModel, FlowPanelModel, PageModel, DefaultTitleModel, Question, QuestionNonValue, QuestionEmptyModel, QuestionCheckboxBase, QuestionSelectBase, QuestionCheckboxModel, QuestionRankingModel, QuestionCommentModel, QuestionDropdownModel, QuestionFactory, ElementFactory, QuestionFileModel, QuestionHtmlModel, QuestionRadiogroupModel, QuestionRatingModel, RenderedRatingItem, QuestionExpressionModel, QuestionTextModel, QuestionBooleanModel, QuestionImagePickerModel, ImageItemValue, QuestionImageModel, QuestionSignaturePadModel, QuestionPanelDynamicModel, QuestionPanelDynamicItem, SurveyTimer, SurveyTimerModel, SurveyProgressModel, SurveyProgressButtonsModel, SurveyModel, Model, SurveyTrigger, SurveyTriggerComplete, SurveyTriggerSetValue, SurveyTriggerVisible, SurveyTriggerCopyValue, SurveyTriggerRunExpression, Trigger, SurveyWindowModel, TextPreProcessor, dxSurveyService, englishStrings, surveyLocalization, surveyStrings, QuestionCustomWidget, CustomWidgetCollection, QuestionCustomModel, QuestionCompositeModel, ComponentQuestionJSON, ComponentCollection, StylesManager, ListModel, PopupModel, PopupBaseViewModel, createPopupModalViewModel, QuestionButtonGroupModel, ButtonGroupItemModel, ButtonGroupItemValue, IsMobile, IsTouch, confirmAction, detectIEOrEdge, doKey2ClickUp, doKey2ClickDown, loadFileFromBase64, increaseHeightByContent, createSvg, CssClassBuilder, surveyCss, DragDropSurveyElements, DragDropChoices, defaultStandardCss, defaultBootstrapCss, defaultBootstrapMaterialCss, defaultV2Css, modernCss, SvgIconRegistry, SvgRegistry, SvgBundleViewModel, RendererFactory, ResponsivityManager, VerticalResponsivityManager, unwrap, Action, ActionDropdownViewModel, AdaptiveActionContainer, defaultActionBarCss, ActionContainer, TooltipManager, DragOrClickHelper, Survey, SurveyWindow, ImplementorBase, QuestionRow, Page, Panel, FlowPanel, QuestionImplementor, QuestionSelectBaseImplementor, QuestionCheckboxBaseImplementor, QuestionCheckbox, QuestionRanking, QuestionComment, QuestionDropdown, QuestionFile, QuestionHtml, QuestionMatrix, QuestionMatrixDropdown, QuestionMatrixDynamicImplementor, QuestionMatrixDynamic, QuestionPanelDynamic, MultipleTextItem, QuestionMultipleText, QuestionRadiogroup, QuestionRating, QuestionRatingImplementor, QuestionText, QuestionBoolean, QuestionEmpty, QuestionExpression, QuestionImagePicker, SurveyWindowImplementor, SurveyTemplateText, QuestionImage, QuestionSignaturePad, QuestionCustom, QuestionButtonGroup, ActionBarItemViewModel, ActionBarItemDropdownViewModel, ActionBarSeparatorViewModel, ActionContainerImplementor, CheckboxViewModel, BooleanRadioItemViewModel, BooleanRadioViewModel, PanelViewModel, PopupViewModel, showModal, ProgressButtonsViewModel, ProgressViewModel, TitleElementViewModel, TitleContentViewModel, TitleActionViewModel, StringEditorViewModel, StringViewerViewModel, LogoImageViewModel, Skeleton, RatingDropdownViewModel, DropdownViewModel, DropdownSelectViewModel, ListItemViewComponent, ListViewComponent, SvgIconViewModel, SurveyQuestionMatrixDynamicRemoveButton, SurveyQuestionMatrixDetailButton, SurveyQuestionMatrixDynamicDragDropIcon, ButtonGroupItemViewModel, TooltipErrorViewModel, SurveyNavigationButton, SurveyQuestionPaneldynamicActioons */
+
+/*! exports provided: arabicSurveyStrings */
+
+/*! exports provided: basqueSurveyStrings */
+
+/*! exports provided: bulgarianStrings */
+
+/*! exports provided: catalanSurveyStrings */
+
+/*! exports provided: croatianStrings */
+
+/*! exports provided: czechSurveyStrings */
+
+/*! exports provided: danishSurveyStrings */
+
+/*! exports provided: default */
+
+/*! exports provided: defaultActionBarCss, ActionContainer */
+
+/*! exports provided: defaultBootstrapCss */
+
+/*! exports provided: defaultBootstrapMaterialCss */
+
+/*! exports provided: defaultV2Css */
+
+/*! exports provided: dutchSurveyStrings */
+
+/*! exports provided: dxSurveyService */
+
+/*! exports provided: englishStrings */
+
+/*! exports provided: estonianSurveyStrings */
+
+/*! exports provided: finnishSurveyStrings */
+
+/*! exports provided: frenchSurveyStrings */
+
+/*! exports provided: georgianSurveyStrings */
+
+/*! exports provided: germanSurveyStrings */
+
+/*! exports provided: greekSurveyStrings */
+
+/*! exports provided: hebrewSurveyStrings */
+
+/*! exports provided: hindiStrings */
+
+/*! exports provided: hungarianSurveyStrings */
+
+/*! exports provided: icelandicSurveyStrings */
+
+/*! exports provided: indonesianStrings */
+
+/*! exports provided: italianSurveyStrings */
+
+/*! exports provided: japaneseSurveyStrings */
+
+/*! exports provided: kazakhStrings */
+
+/*! exports provided: koTemplate, SurveyTemplateText */
+
+/*! exports provided: koreanStrings */
+
+/*! exports provided: latvianSurveyStrings */
+
+/*! exports provided: lithuaniaSurveyStrings */
+
+/*! exports provided: macedonianSurveyStrings */
+
+/*! exports provided: malaySurveyStrings */
+
+/*! exports provided: matrixDropdownColumnTypes, MatrixDropdownColumn */
+
+/*! exports provided: modernCss */
+
+/*! exports provided: norwegianSurveyStrings */
+
+/*! exports provided: persianSurveyStrings */
+
+/*! exports provided: polishSurveyStrings */
+
+/*! exports provided: portugueseBrSurveyStrings */
+
+/*! exports provided: portugueseSurveyStrings */
+
+/*! exports provided: property, propertyArray, JsonObjectProperty, CustomPropertiesCollection, JsonMetadataClass, JsonMetadata, JsonError, JsonUnknownPropertyError, JsonMissingTypeErrorBase, JsonMissingTypeError, JsonIncorrectTypeError, JsonRequiredPropertyError, JsonObject, Serializer */
+
+/*! exports provided: romanianSurveyStrings */
+
+/*! exports provided: russianSurveyStrings */
+
+/*! exports provided: serbianStrings */
+
+/*! exports provided: settings */
+
+/*! exports provided: simplifiedChineseSurveyStrings */
+
+/*! exports provided: slovakSurveyStrings */
+
+/*! exports provided: spanishSurveyStrings */
+
+/*! exports provided: surveyCss, defaultStandardCss */
+
+/*! exports provided: surveyLocalization, surveyStrings */
+
+/*! exports provided: surveyTimerFunctions, SurveyTimer */
+
+/*! exports provided: swahiliStrings */
+
+/*! exports provided: swedishSurveyStrings */
+
+/*! exports provided: tajikSurveyStrings */
+
+/*! exports provided: thaiStrings */
+
+/*! exports provided: traditionalChineseSurveyStrings */
+
+/*! exports provided: turkishSurveyStrings */
+
+/*! exports provided: ukrainianSurveyStrings */
+
+/*! exports provided: unwrap, getSize, getElementWidth, isContainerVisible, classesToSelector, compareVersions, confirmAction, detectIEOrEdge, detectIEBrowser, loadFileFromBase64, isMobile, isElementVisible, findScrollableParent, scrollElementByChildId, createSvg, doKey2ClickBlur, doKey2ClickUp, doKey2ClickDown, getIconNameFromProxy, increaseHeightByContent, getOriginalEvent, preventDefaults */
+
+/*! exports provided: vietnameseSurveyStrings */
+
+/*! exports provided: welshSurveyStrings */
+
+/*! html-loader?interpolate!val-loader!./buttons.html */
+
+/*! html-loader?interpolate!val-loader!./panel.html */
+
+/*! html-loader?interpolate!val-loader!./popup.html */
+
+/*! html-loader?interpolate!val-loader!./progress.html */
+
+/*! html-loader?interpolate!val-loader!./templates/entry.html */
+
+/*! html-loader?interpolate!val-loader!./templates/window/window.html */
+
+/*! html-loader?interpolate!val-loader!./tooltip-error.html */
+
+/*! knockout */
+
+/*! no exports provided */
+
+/*! no static exports found */
+
+/*! setimmediate */
+
+/*! signature_pad */
+
+/*! src/utils/popup */
+
+/*! survey-core */
+
+/*! timers */
+
+/*!*********************!*\
+	  !*** ./src/base.ts ***!
+	  \*********************/
+
+/*!*********************!*\
+	  !*** ./src/list.ts ***!
+	  \*********************/
+
+/*!*********************!*\
+	  !*** ./src/page.ts ***!
+	  \*********************/
+
+/*!**********************!*\
+	  !*** ./src/error.ts ***!
+	  \**********************/
+
+/*!**********************!*\
+	  !*** ./src/panel.ts ***!
+	  \**********************/
+
+/*!**********************!*\
+	  !*** ./src/popup.ts ***!
+	  \**********************/
+
+/*!***********************!*\
+	  !*** ./src/main.scss ***!
+	  \***********************/
+
+/*!***********************!*\
+	  !*** ./src/survey.ts ***!
+	  \***********************/
+
+/*!************************!*\
+	  !*** ./src/helpers.ts ***!
+	  \************************/
+
+/*!************************!*\
+	  !*** ./src/trigger.ts ***!
+	  \************************/
+
+/*!*************************!*\
+	  !*** ./src/question.ts ***!
+	  \*************************/
+
+/*!*************************!*\
+	  !*** ./src/settings.ts ***!
+	  \*************************/
+
+/*!**************************!*\
+	  !*** ./src/flowpanel.ts ***!
+	  \**************************/
+
+/*!**************************!*\
+	  !*** ./src/itemvalue.ts ***!
+	  \**************************/
+
+/*!**************************!*\
+	  !*** ./src/svgbundle.ts ***!
+	  \**************************/
+
+/*!**************************!*\
+	  !*** ./src/validator.ts ***!
+	  \**************************/
+
+/*!***************************!*\
+	  !*** ./src/conditions.ts ***!
+	  \***************************/
+
+/*!***************************!*\
+	  !*** ./src/jsonobject.ts ***!
+	  \***************************/
+
+/*!***************************!*\
+	  !*** ./src/martixBase.ts ***!
+	  \***************************/
+
+/*!****************************!*\
+	  !*** ./src/surveytimer.ts ***!
+	  \****************************/
+
+/*!****************************!*\
+	  !*** ./src/utils/popup.ts ***!
+	  \****************************/
+
+/*!****************************!*\
+	  !*** ./src/utils/utils.ts ***!
+	  \****************************/
+
+/*!*****************************!*\
+	  !*** ./src/defaultTitle.ts ***!
+	  \*****************************/
+
+/*!*****************************!*\
+	  !*** ./src/entries/core.ts ***!
+	  \*****************************/
+
+/*!*****************************!*\
+	  !*** ./src/images/Left.svg ***!
+	  \*****************************/
+
+/*!*****************************!*\
+	  !*** ./src/images/More.svg ***!
+	  \*****************************/
+
+/*!*****************************!*\
+	  !*** ./src/survey-error.ts ***!
+	  \*****************************/
+
+/*!*****************************!*\
+	  !*** ./src/surveyWindow.ts ***!
+	  \*****************************/
+
+/*!******************************!*\
+	  !*** ./src/dragdrop/core.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/images/Clear.svg ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/images/Right.svg ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/question_file.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/question_html.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/question_text.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/stylesmanager.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/surveyStrings.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/utils/devices.ts ***!
+	  \******************************/
+
+/*!******************************!*\
+	  !*** ./src/utils/tooltip.ts ***!
+	  \******************************/
+
+/*!*******************************!*\
+	  !*** ./src/actions/action.ts ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/choicesRestful.ts ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/images/Delete.svg ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/images/search.svg ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/question_empty.ts ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/question_image.ts ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/survey-element.ts ***!
+	  \*******************************/
+
+/*!*******************************!*\
+	  !*** ./src/surveyProgress.ts ***!
+	  \*******************************/
+
+/*!********************************!*\
+	  !*** ./src/calculatedValue.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/dxSurveyService.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/expressionItems.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/images/V2Check.svg ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/knockout/kobase.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/knockout/kopage.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/question_custom.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/question_matrix.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/question_rating.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/questionfactory.ts ***!
+	  \********************************/
+
+/*!********************************!*\
+	  !*** ./src/rendererFactory.ts ***!
+	  \********************************/
+
+/*!*********************************!*\
+	  !*** ./src/conditionsParser.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/dragdrop/choices.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/entries/knockout.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/functionsfactory.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/images/no-image.svg ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/question_boolean.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/question_comment.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/question_ranking.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/questionnonvalue.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/surveyTimerModel.ts ***!
+	  \*********************************/
+
+/*!*********************************!*\
+	  !*** ./src/textPreProcessor.ts ***!
+	  \*********************************/
+
+/*!**********************************!*\
+	  !*** ./src/actions/container.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/images/ArrowLeft.svg ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/knockout/kosurvey.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/localizablestring.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/localization/thai.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/question_checkbox.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/question_dropdown.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/question_textbase.ts ***!
+	  \**********************************/
+
+/*!**********************************!*\
+	  !*** ./src/template-renderer.ts ***!
+	  \**********************************/
+
+/*!***********************************!*\
+	  !*** (webpack)/buildin/global.js ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/images/ArrowRight.svg ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/images/ChooseFile.svg ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/images/Down_34x34.svg ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/images/RemoveFile.svg ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/czech.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/dutch.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/greek.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/hindi.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/malay.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/nl-BE.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/tajik.ts ***!
+	  \***********************************/
+
+/*!***********************************!*\
+	  !*** ./src/localization/welsh.ts ***!
+	  \***********************************/
+
+/*!************************************!*\
+	  !*** ./src/images/DefaultFile.svg ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/images/ModernCheck.svg ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/images/ModernRadio.svg ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/knockout/koquestion.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/arabic.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/basque.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/danish.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/french.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/german.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/hebrew.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/kazakh.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/korean.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/polish.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/localization/slovak.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/question_baseselect.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/question_expression.ts ***!
+	  \************************************/
+
+/*!************************************!*\
+	  !*** ./src/question_radiogroup.ts ***!
+	  \************************************/
+
+/*!*************************************!*\
+	  !*** ./src/defaultCss/cssmodern.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/dragdrop/matrix-rows.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/entries/chunks/model.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/images/expandDetail.svg ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/knockout/koflowpanel.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/catalan.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/english.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/finnish.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/italian.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/latvian.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/persian.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/russian.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/serbian.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/spanish.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/swahili.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/swedish.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/localization/turkish.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/question_buttongroup.ts ***!
+	  \*************************************/
+
+/*!*************************************!*\
+	  !*** ./src/question_imagepicker.ts ***!
+	  \*************************************/
+
+/*!**************************************!*\
+	  !*** ./src/conditionProcessValue.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/knockout/templateText.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/localization/croatian.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/localization/estonian.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/localization/georgian.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/localization/japanese.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/localization/romanian.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/questionCustomWidgets.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/question_multipletext.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/question_paneldynamic.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/question_signaturepad.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/surveyProgressButtons.ts ***!
+	  \**************************************/
+
+/*!**************************************!*\
+	  !*** ./src/utils/cssClassBuilder.ts ***!
+	  \**************************************/
+
+/*!***************************************!*\
+	  !*** ./src/defaultCss/cssstandard.ts ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/images/ProgressButton.svg ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/images/collapseDetail.svg ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/localization/bulgarian.ts ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/localization/hungarian.ts ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/localization/icelandic.ts ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/localization/norwegian.ts ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/localization/ukrainian.ts ***!
+	  \***************************************/
+
+/*!***************************************!*\
+	  !*** ./src/question_matrixdynamic.ts ***!
+	  \***************************************/
+
+/*!****************************************!*\
+	  !*** ./src/defaultCss/cssbootstrap.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/defaultCss/defaultV2Css.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/expressions/expressions.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/images/ArrowDown_34x34.svg ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/knockout/koSurveyWindow.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/localization/indonesian.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/localization/lithuanian.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/localization/macedonian.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/localization/portuguese.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/localization/vietnamese.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/question_matrixdropdown.ts ***!
+	  \****************************************/
+
+/*!****************************************!*\
+	  !*** ./src/utils/dragOrClickHelper.ts ***!
+	  \****************************************/
+
+/*!*****************************************!*\
+	  !*** ./node_modules/process/browser.js ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/dragdrop/ranking-choices.ts ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/dragdrop/survey-elements.ts ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/images/ProgressButtonV2.svg ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/knockout/koquestion_file.ts ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/knockout/koquestion_html.ts ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/knockout/koquestion_text.ts ***!
+	  \*****************************************/
+
+/*!*****************************************!*\
+	  !*** ./src/knockout/templates/row.html ***!
+	  \*****************************************/
+
+/*!******************************************!*\
+	  !*** ./src/entries/knockout-ui-model.ts ***!
+	  \******************************************/
+
+/*!******************************************!*\
+	  !*** ./src/knockout/koquestion_empty.ts ***!
+	  \******************************************/
+
+/*!******************************************!*\
+	  !*** ./src/knockout/koquestion_image.ts ***!
+	  \******************************************/
+
+/*!******************************************!*\
+	  !*** ./src/knockout/templates/page.html ***!
+	  \******************************************/
+
+/*!******************************************!*\
+	  !*** ./src/knockout/templates/rows.html ***!
+	  \******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/actions/adaptive-container.ts ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/knockout/koquestion_custom.ts ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/knockout/koquestion_matrix.ts ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/knockout/koquestion_rating.ts ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/knockout/templates/index.html ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/knockout/templates/panel.html ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/localization/portuguese-br.ts ***!
+	  \*******************************************/
+
+/*!*******************************************!*\
+	  !*** ./src/utils/responsivity-manager.ts ***!
+	  \*******************************************/
+
+/*!********************************************!*\
+	  !*** ./src/entries/chunks/localization.ts ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/images/V2DragElement_16x16.svg ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/knockout/koquestion_boolean.ts ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/knockout/koquestion_comment.ts ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/knockout/koquestion_ranking.ts ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/knockout/templates/header.html ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/knockout/templates/string.html ***!
+	  \********************************************/
+
+/*!********************************************!*\
+	  !*** ./src/question_matrixdropdownbase.ts ***!
+	  \********************************************/
+
+/*!*********************************************!*\
+	  !*** ./src/expressions/expressionParser.ts ***!
+	  \*********************************************/
+
+/*!*********************************************!*\
+	  !*** ./src/images sync nonrecursive \.svg$ ***!
+	  \*********************************************/
+
+/*!*********************************************!*\
+	  !*** ./src/images/Arrow_downGREY_10x10.svg ***!
+	  \*********************************************/
+
+/*!*********************************************!*\
+	  !*** ./src/knockout/koquestion_checkbox.ts ***!
+	  \*********************************************/
+
+/*!*********************************************!*\
+	  !*** ./src/knockout/koquestion_dropdown.ts ***!
+	  \*********************************************/
+
+/*!*********************************************!*\
+	  !*** ./src/knockout/templates/comment.html ***!
+	  \*********************************************/
+
+/*!**********************************************!*\
+	  !*** ./src/knockout/components/list/list.ts ***!
+	  \**********************************************/
+
+/*!**********************************************!*\
+	  !*** ./src/knockout/templates/question.html ***!
+	  \**********************************************/
+
+/*!**********************************************!*\
+	  !*** ./src/question_matrixdropdowncolumn.ts ***!
+	  \**********************************************/
+
+/*!***********************************************!*\
+	  !*** ./src/knockout/koquestion_baseselect.ts ***!
+	  \***********************************************/
+
+/*!***********************************************!*\
+	  !*** ./src/knockout/koquestion_expression.ts ***!
+	  \***********************************************/
+
+/*!***********************************************!*\
+	  !*** ./src/knockout/koquestion_radiogroup.ts ***!
+	  \***********************************************/
+
+/*!***********************************************!*\
+	  !*** ./src/knockout/templates/flowpanel.html ***!
+	  \***********************************************/
+
+/*!************************************************!*\
+	  !*** ./node_modules/timers-browserify/main.js ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/defaultCss/cssbootstrapmaterial.ts ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/knockout/components/list/list.html ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/knockout/components/panel/panel.ts ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/knockout/components/popup/popup.ts ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/knockout/koquestion_buttongroup.ts ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/knockout/koquestion_imagepicker.ts ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/knockout/templates/timerpanel.html ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/localization/simplified-chinese.ts ***!
+	  \************************************************/
+
+/*!************************************************!*\
+	  !*** ./src/question_matrixdropdownrendered.ts ***!
+	  \************************************************/
+
+/*!*************************************************!*\
+	  !*** ./src/knockout/koquestion_multipletext.ts ***!
+	  \*************************************************/
+
+/*!*************************************************!*\
+	  !*** ./src/knockout/koquestion_paneldynamic.ts ***!
+	  \*************************************************/
+
+/*!*************************************************!*\
+	  !*** ./src/knockout/koquestion_signaturepad.ts ***!
+	  \*************************************************/
+
+/*!*************************************************!*\
+	  !*** ./src/localization/traditional-chinese.ts ***!
+	  \*************************************************/
+
+/*!**************************************************!*\
+	  !*** ./src/knockout/koquestion_matrixdynamic.ts ***!
+	  \**************************************************/
+
+/*!***************************************************!*\
+	  !*** ./node_modules/setimmediate/setImmediate.js ***!
+	  \***************************************************/
+
+/*!***************************************************!*\
+	  !*** ./src/knockout/components/list/list-item.ts ***!
+	  \***************************************************/
+
+/*!***************************************************!*\
+	  !*** ./src/knockout/koquestion_matrixdropdown.ts ***!
+	  \***************************************************/
+
+/*!***************************************************!*\
+	  !*** ./src/knockout/templates/question-file.html ***!
+	  \***************************************************/
+
+/*!***************************************************!*\
+	  !*** ./src/knockout/templates/question-html.html ***!
+	  \***************************************************/
+
+/*!***************************************************!*\
+	  !*** ./src/knockout/templates/question-text.html ***!
+	  \***************************************************/
+
+/*!***************************************************!*\
+	  !*** ./src/knockout/templates/questiontitle.html ***!
+	  \***************************************************/
+
+/*!****************************************************!*\
+	  !*** ./src/knockout/templates/question-empty.html ***!
+	  \****************************************************/
+
+/*!****************************************************!*\
+	  !*** ./src/knockout/templates/question-image.html ***!
+	  \****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/components/list/list-item.html ***!
+	  \*****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/components/progress/buttons.ts ***!
+	  \*****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/templates/question-custom.html ***!
+	  \*****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/templates/question-errors.html ***!
+	  \*****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/templates/question-matrix.html ***!
+	  \*****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/templates/question-rating.html ***!
+	  \*****************************************************/
+
+/*!*****************************************************!*\
+	  !*** ./src/knockout/templates/questioncontent.html ***!
+	  \*****************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action.ts ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/components/dropdown/dropdown.ts ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/components/progress/progress.ts ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/components/skeleton/skeleton.ts ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/components/svg-icon/svg-icon.ts ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/templates/question-boolean.html ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/templates/question-comment.html ***!
+	  \******************************************************/
+
+/*!******************************************************!*\
+	  !*** ./src/knockout/templates/question-ranking.html ***!
+	  \******************************************************/
+
+/*!*******************************************************!*\
+	  !*** ./src/knockout/templates/question-checkbox.html ***!
+	  \*******************************************************/
+
+/*!*******************************************************!*\
+	  !*** ./src/knockout/templates/question-dropdown.html ***!
+	  \*******************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action.html ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/dropdown/dropdown.html ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/skeleton/skeleton.html ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/svg-icon/svg-icon.html ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/title/title-actions.ts ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/title/title-content.ts ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/components/title/title-element.ts ***!
+	  \********************************************************/
+
+/*!********************************************************!*\
+	  !*** ./src/knockout/templates/question-composite.html ***!
+	  \********************************************************/
+
+/*!*********************************************************!*\
+	  !*** ./src/knockout/templates/question-expression.html ***!
+	  \*********************************************************/
+
+/*!*********************************************************!*\
+	  !*** ./src/knockout/templates/question-radiogroup.html ***!
+	  \*********************************************************/
+
+/*!**********************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar.ts ***!
+	  \**********************************************************/
+
+/*!**********************************************************!*\
+	  !*** ./src/knockout/components/logo-image/logo-image.ts ***!
+	  \**********************************************************/
+
+/*!**********************************************************!*\
+	  !*** ./src/knockout/components/title/title-actions.html ***!
+	  \**********************************************************/
+
+/*!**********************************************************!*\
+	  !*** ./src/knockout/components/title/title-content.html ***!
+	  \**********************************************************/
+
+/*!**********************************************************!*\
+	  !*** ./src/knockout/templates/question-buttongroup.html ***!
+	  \**********************************************************/
+
+/*!**********************************************************!*\
+	  !*** ./src/knockout/templates/question-imagepicker.html ***!
+	  \**********************************************************/
+
+/*!***********************************************************!*\
+	  !*** ./node_modules/signature_pad/dist/signature_pad.mjs ***!
+	  \***********************************************************/
+
+/*!***********************************************************!*\
+	  !*** ./src/knockout/templates/question-multipletext.html ***!
+	  \***********************************************************/
+
+/*!***********************************************************!*\
+	  !*** ./src/knockout/templates/question-paneldynamic.html ***!
+	  \***********************************************************/
+
+/*!***********************************************************!*\
+	  !*** ./src/knockout/templates/question-signaturepad.html ***!
+	  \***********************************************************/
+
+/*!************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar.html ***!
+	  \************************************************************/
+
+/*!************************************************************!*\
+	  !*** ./src/knockout/components/logo-image/logo-image.html ***!
+	  \************************************************************/
+
+/*!************************************************************!*\
+	  !*** ./src/knockout/templates/question-matrixdynamic.html ***!
+	  \************************************************************/
+
+/*!***************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar-item.ts ***!
+	  \***************************************************************/
+
+/*!****************************************************************!*\
+	  !*** ./src/knockout/components/boolean-radio/boolean-radio.ts ***!
+	  \****************************************************************/
+
+/*!****************************************************************!*\
+	  !*** ./src/knockout/components/string-editor/string-editor.ts ***!
+	  \****************************************************************/
+
+/*!****************************************************************!*\
+	  !*** ./src/knockout/components/string-viewer/string-viewer.ts ***!
+	  \****************************************************************/
+
+/*!****************************************************************!*\
+	  !*** ./src/knockout/components/tooltip-error/tooltip-error.ts ***!
+	  \****************************************************************/
+
+/*!*****************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar-item.html ***!
+	  \*****************************************************************/
+
+/*!******************************************************************!*\
+	  !*** ./src/knockout/components/boolean-radio/boolean-radio.html ***!
+	  \******************************************************************/
+
+/*!******************************************************************!*\
+	  !*** ./src/knockout/components/string-editor/string-editor.html ***!
+	  \******************************************************************/
+
+/*!******************************************************************!*\
+	  !*** ./src/knockout/components/string-viewer/string-viewer.html ***!
+	  \******************************************************************/
+
+/*!*******************************************************************!*\
+	  !*** ./src/knockout/components/button-group/button-group-item.ts ***!
+	  \*******************************************************************/
+
+/*!********************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar-separator.ts ***!
+	  \********************************************************************/
+
+/*!********************************************************************!*\
+	  !*** ./src/knockout/components/dropdown-select/dropdown-select.ts ***!
+	  \********************************************************************/
+
+/*!********************************************************************!*\
+	  !*** ./src/knockout/components/rating-dropdown/rating-dropdown.ts ***!
+	  \********************************************************************/
+
+/*!*********************************************************************!*\
+	  !*** ./src/knockout/components/boolean-radio/boolean-radio-item.ts ***!
+	  \*********************************************************************/
+
+/*!*********************************************************************!*\
+	  !*** ./src/knockout/components/button-group/button-group-item.html ***!
+	  \*********************************************************************/
+
+/*!*********************************************************************!*\
+	  !*** ./src/knockout/components/survey-actions/survey-nav-button.ts ***!
+	  \*********************************************************************/
+
+/*!*********************************************************************!*\
+	  !*** ./src/knockout/templates/question-paneldynamic-navigator.html ***!
+	  \*********************************************************************/
+
+/*!**********************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar-separator.html ***!
+	  \**********************************************************************/
+
+/*!**********************************************************************!*\
+	  !*** ./src/knockout/components/boolean-checkbox/boolean-checkbox.ts ***!
+	  \**********************************************************************/
+
+/*!**********************************************************************!*\
+	  !*** ./src/knockout/components/dropdown-select/dropdown-select.html ***!
+	  \**********************************************************************/
+
+/*!**********************************************************************!*\
+	  !*** ./src/knockout/components/rating-dropdown/rating-dropdown.html ***!
+	  \**********************************************************************/
+
+/*!***********************************************************************!*\
+	  !*** ./src/knockout/components/boolean-radio/boolean-radio-item.html ***!
+	  \***********************************************************************/
+
+/*!***********************************************************************!*\
+	  !*** ./src/knockout/components/survey-actions/survey-nav-button.html ***!
+	  \***********************************************************************/
+
+/*!************************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar-item-dropdown.ts ***!
+	  \************************************************************************/
+
+/*!************************************************************************!*\
+	  !*** ./src/knockout/components/boolean-checkbox/boolean-checkbox.html ***!
+	  \************************************************************************/
+
+/*!************************************************************************!*\
+	  !*** ./src/knockout/components/template-renderer/template-renderer.ts ***!
+	  \************************************************************************/
+
+/*!**************************************************************************!*\
+	  !*** ./src/knockout/components/action-bar/action-bar-item-dropdown.html ***!
+	  \**************************************************************************/
+
+/*!**************************************************************************!*\
+	  !*** ./src/knockout/components/template-renderer/template-renderer.html ***!
+	  \**************************************************************************/
+
+/*!******************************************************************************!*\
+	  !*** ./src/knockout/components/paneldynamic-actions/paneldynamic-actions.ts ***!
+	  \******************************************************************************/
+
+/*!*******************************************************************************!*\
+	  !*** ./src/knockout/components/matrix-actions/detail-button/detail-button.ts ***!
+	  \*******************************************************************************/
+
+/*!*******************************************************************************!*\
+	  !*** ./src/knockout/components/matrix-actions/remove-button/remove-button.ts ***!
+	  \*******************************************************************************/
+
+/*!********************************************************************************!*\
+	  !*** ./src/knockout/components/paneldynamic-actions/paneldynamic-add-btn.html ***!
+	  \********************************************************************************/
+
+/*!*********************************************************************************!*\
+	  !*** ./src/knockout/components/matrix-actions/detail-button/detail-button.html ***!
+	  \*********************************************************************************/
+
+/*!*********************************************************************************!*\
+	  !*** ./src/knockout/components/matrix-actions/drag-drop-icon/drag-drop-icon.ts ***!
+	  \*********************************************************************************/
+
+/*!*********************************************************************************!*\
+	  !*** ./src/knockout/components/matrix-actions/remove-button/remove-button.html ***!
+	  \*********************************************************************************/
+
+/*!*********************************************************************************!*\
+	  !*** ./src/knockout/components/paneldynamic-actions/paneldynamic-next-btn.html ***!
+	  \*********************************************************************************/
+
+/*!*********************************************************************************!*\
+	  !*** ./src/knockout/components/paneldynamic-actions/paneldynamic-prev-btn.html ***!
+	  \*********************************************************************************/
+
+/*!***********************************************************************************!*\
+	  !*** ./src/knockout/components/matrix-actions/drag-drop-icon/drag-drop-icon.html ***!
+	  \***********************************************************************************/
+
+/*!**************************************************************************************!*\
+	  !*** ./src/knockout/components/paneldynamic-actions/paneldynamic-progress-text.html ***!
+	  \**************************************************************************************/
+
+/*!********************************************************************************************!*\
+	  !*** external {"root":"ko","commonjs2":"knockout","commonjs":"knockout","amd":"knockout"} ***!
+	  \********************************************************************************************/
+
+/*!************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/templates/entry.html ***!
+	  \************************************************************************************************************/
+
+/*!*******************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/components/panel/panel.html ***!
+	  \*******************************************************************************************************************/
+
+/*!*******************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/components/popup/popup.html ***!
+	  \*******************************************************************************************************************/
+
+/*!********************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/templates/window/window.html ***!
+	  \********************************************************************************************************************/
+
+/*!************************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/components/progress/buttons.html ***!
+	  \************************************************************************************************************************/
+
+/*!*************************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/components/progress/progress.html ***!
+	  \*************************************************************************************************************************/
+
+/*!***********************************************************************************************************************************!*\
+	  !*** ./node_modules/html-loader?interpolate!./node_modules/val-loader!./src/knockout/components/tooltip-error/tooltip-error.html ***!
+	  \***********************************************************************************************************************************/
